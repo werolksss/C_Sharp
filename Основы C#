@@ -1,0 +1,158 @@
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        //1
+        Console.WriteLine("FizzBuzz");
+        Console.Write("Введите число: ");
+        int num = int.Parse(Console.ReadLine());
+
+        if (num < 1 || num > 100)
+        {
+            Console.WriteLine("Ошибка");
+        }
+        else
+        {
+            if (num % 3 == 0 && num % 5 == 0)
+                Console.WriteLine("Fizz Buzz");
+            else if (num % 3 == 0)
+                Console.WriteLine("Fizz");
+            else if (num % 5 == 0)
+                Console.WriteLine("Buzz");
+            else
+                Console.WriteLine(num);
+        }
+
+        Console.WriteLine();
+
+        //2
+        Console.WriteLine("Процент");
+        Console.Write("Введите число: ");
+        double number = double.Parse(Console.ReadLine());
+
+        Console.Write("Введите процент: ");
+        double percent = double.Parse(Console.ReadLine());
+
+        Console.WriteLine("Результат: " + (number * percent / 100));
+
+        Console.WriteLine();
+
+        //3
+        Console.WriteLine("Число из цифр");
+        Console.Write("Введите 4 цифры через пробел: ");
+        string[] arr = Console.ReadLine().Split();
+
+        int resultNum = int.Parse(arr[0]) * 1000 +
+                        int.Parse(arr[1]) * 100 +
+                        int.Parse(arr[2]) * 10 +
+                        int.Parse(arr[3]);
+
+        Console.WriteLine("Число: " + resultNum);
+
+        Console.WriteLine();
+
+        //4
+        Console.WriteLine("Обмен цифр");
+        Console.Write("Введите шестизначное число: ");
+        string s = Console.ReadLine();
+
+        if (s.Length != 6)
+        {
+            Console.WriteLine("Ошибка!");
+        }
+        else
+        {
+            Console.Write("Введите первый разряд (1-6): ");
+            int i = int.Parse(Console.ReadLine()) - 1;
+
+            Console.Write("Введите второй разряд (1-6): ");
+            int j = int.Parse(Console.ReadLine()) - 1;
+
+            char[] digits = s.ToCharArray();
+
+            char temp = digits[i];
+            digits[i] = digits[j];
+            digits[j] = temp;
+
+            Console.WriteLine("Результат: " + new string(digits));
+        }
+
+        Console.WriteLine();
+
+        //5
+        Console.WriteLine("Дата");
+        Console.Write("Введите дату (дд.мм.гггг): ");
+        DateTime date = DateTime.Parse(Console.ReadLine());
+
+        string season;
+        int m = date.Month;
+
+        if (m == 12 || m == 1 || m == 2)
+            season = "Зима";
+        else if (m >= 3 && m <= 5)
+            season = "Весна";
+        else if (m >= 6 && m <= 8)
+            season = "Лето";
+        else
+            season = "Осень";
+
+        string dayrus = "";
+
+        switch (date.DayOfWeek)
+        {
+            case DayOfWeek.Monday: dayrus = "Понедельник"; break;
+            case DayOfWeek.Tuesday: dayrus = "Вторник"; break;
+            case DayOfWeek.Wednesday: dayrus = "Среда"; break;
+            case DayOfWeek.Thursday: dayrus = "Четверг"; break;
+            case DayOfWeek.Friday: dayrus = "Пятница"; break;
+            case DayOfWeek.Saturday: dayrus = "Суббота"; break;
+            case DayOfWeek.Sunday: dayrus = "Воскресенье"; break;
+        }
+
+        Console.WriteLine(season + " " + dayrus);
+
+        Console.WriteLine();
+
+        //6
+        Console.WriteLine("Температура");
+        Console.Write("Введите температуру: ");
+        double tempVal = double.Parse(Console.ReadLine());
+
+        Console.WriteLine("1 - Перевод из Цельсия в Фаренгейт");
+        Console.WriteLine("2 - Перевод из Фаренгейта в Цельсий");
+        int choice = int.Parse(Console.ReadLine());
+
+        if (choice == 1)
+            Console.WriteLine("Результат: " + (tempVal * 9 / 5 + 32));
+        else if (choice == 2)
+            Console.WriteLine("Результат: " + ((tempVal - 32) * 5 / 9));
+        else
+            Console.WriteLine("Ошибка");
+
+        Console.WriteLine();
+
+        //7
+        Console.WriteLine("Четные числа");
+        Console.Write("Введите первое число: ");
+        int a = int.Parse(Console.ReadLine());
+
+        Console.Write("Введите второе число: ");
+        int b = int.Parse(Console.ReadLine());
+
+        if (a > b)
+        {
+            int t = a;
+            a = b;
+            b = t;
+        }
+
+        Console.WriteLine("Четные числа:");
+        for (int k = a; k <= b; k++)
+        {
+            if (k % 2 == 0)
+                Console.Write(k + " ");
+        }
+    }
+}
