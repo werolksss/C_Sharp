@@ -1,0 +1,241 @@
+
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        //1
+        Console.WriteLine("Задание 1");
+
+        int[] arr1 = { 1, 2, 3, 4, 4, 5, 6, 7, 7 };
+
+        int even = 0;
+        int odd = 0;
+        int unique = 0;
+
+        for (int i = 0; i < arr1.Length; i++)
+        {
+            if (arr1[i] % 2 == 0)
+                even++;
+            else
+                odd++;
+
+            bool isUnique = true;
+
+            for (int j = 0; j < arr1.Length; j++)
+            {
+                if (i != j && arr1[i] == arr1[j])
+                {
+                    isUnique = false;
+                    break;
+                }
+            }
+
+            if (isUnique)
+                unique++;
+        }
+
+        Console.WriteLine("Четных: " + even);
+        Console.WriteLine("Нечетных: " + odd);
+        Console.WriteLine("Уникальных: " + unique);
+
+        Console.WriteLine();
+
+        //2
+        Console.WriteLine("Задание 2");
+
+        int[] arr2 = { 1, 5, 7, 9, 2, 3 };
+
+        Console.Write("Введите число: ");
+        int num = int.Parse(Console.ReadLine());
+
+        int count = 0;
+
+        for (int i = 0; i < arr2.Length; i++)
+        {
+            if (arr2[i] < num)
+                count++;
+        }
+
+        Console.WriteLine("Количество элементов меньше числа: " + count);
+
+        Console.WriteLine();
+
+        //3
+        Console.WriteLine("Задание 3");
+
+        int[] arr3 = { 7, 6, 5, 3, 4, 7, 6, 5, 8, 7, 6, 5 };
+
+        Console.Write("Введите первое число: ");
+        int a = int.Parse(Console.ReadLine());
+
+        Console.Write("Введите второе число: ");
+        int b = int.Parse(Console.ReadLine());
+
+        Console.Write("Введите третье число: ");
+        int c = int.Parse(Console.ReadLine());
+
+        int sequenceCount = 0;
+
+        for (int i = 0; i < arr3.Length - 2; i++)
+        {
+            if (arr3[i] == a &&
+                arr3[i + 1] == b &&
+                arr3[i + 2] == c)
+            {
+                sequenceCount++;
+            }
+        }
+
+        Console.WriteLine("Количество повторений: " + sequenceCount);
+
+        Console.WriteLine();
+
+        //4
+        Console.WriteLine("Задание 4");
+
+        int[] first = { 1, 2, 3, 4, 5 };
+        int[] second = { 3, 4, 5, 6, 7 };
+
+        int[] temp = new int[first.Length];
+        int index = 0;
+
+        for (int i = 0; i < first.Length; i++)
+        {
+            for (int j = 0; j < second.Length; j++)
+            {
+                if (first[i] == second[j])
+                {
+                    bool exists = false;
+
+                    for (int k = 0; k < index; k++)
+                    {
+                        if (temp[k] == first[i])
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists)
+                    {
+                        temp[index] = first[i];
+                        index++;
+                    }
+                }
+            }
+        }
+
+        Console.WriteLine("Общие элементы:");
+
+        for (int i = 0; i < index; i++)
+        {
+            Console.Write(temp[i] + " ");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine();
+
+        //5
+        Console.WriteLine("Задание 5");
+
+        int[,] matrix =
+        {
+            {4, 7, 2},
+            {9, 1, 5},
+            {3, 8, 6}
+        };
+
+        int min = matrix[0, 0];
+        int max = matrix[0, 0];
+
+        for (int i = 0; i < matrix.GetLength(0); i++)
+        {
+            for (int j = 0; j < matrix.GetLength(1); j++)
+            {
+                if (matrix[i, j] < min)
+                    min = matrix[i, j];
+
+                if (matrix[i, j] > max)
+                    max = matrix[i, j];
+            }
+        }
+
+        Console.WriteLine("Минимум: " + min);
+        Console.WriteLine("Максимум: " + max);
+
+        Console.WriteLine();
+
+        // 6
+        Console.WriteLine("Задание 6");
+
+        Console.Write("Введите предложение: ");
+        string sentence = Console.ReadLine();
+
+        string[] words = sentence.Split(' ');
+
+        Console.WriteLine("Количество слов: " + words.Length);
+
+        Console.WriteLine();
+
+        //7
+        Console.WriteLine("Задание 7");
+
+        Console.Write("Введите предложение: ");
+        string text = Console.ReadLine();
+
+        string[] splitWords = text.Split(' ');
+
+        for (int i = 0; i < splitWords.Length; i++)
+        {
+            char[] chars = splitWords[i].ToCharArray();
+
+            Array.Reverse(chars);
+
+            Console.Write(new string(chars) + " ");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine();
+
+        // 8
+        Console.WriteLine("Задание 8");
+
+        Console.Write("Введите предложение: ");
+        string str = Console.ReadLine().ToLower();
+
+        int vowels = 0;
+
+        for (int i = 0; i < str.Length; i++)
+        {
+            if ("аеёиоуыэюяaeiou".Contains(str[i]))
+                vowels++;
+        }
+
+        Console.WriteLine("Количество гласных: " + vowels);
+
+        Console.WriteLine();
+
+        // 9
+        Console.WriteLine("Задание 9");
+
+        Console.Write("Введите строку: ");
+        string mainText = Console.ReadLine().ToLower();
+
+        Console.Write("Введите слово для поиска: ");
+        string sub = Console.ReadLine().ToLower();
+
+        int result = 0;
+        int position = 0;
+
+        while ((position = mainText.IndexOf(sub, position)) != -1)
+        {
+            result++;
+            position += sub.Length;
+        }
+
+        Console.WriteLine("Количество вхождений: " + result);
+    }
+}
+
