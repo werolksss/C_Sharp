@@ -1,0 +1,127 @@
+using System;
+
+//1
+struct Article
+{
+    public int ProductCode;     // код товара
+    public string ProductName;  // название товара
+    public double Price;        // цена товара
+}
+
+//2
+struct Client
+{
+    public int ClientCode;      // код клиента
+    public string FullName;     // ФИО
+    public string Address;      // адрес
+    public string Phone;        // телефон
+    public int OrderCount;      // количество заказов
+    public double TotalOrdersSum; // общая сумма заказов
+}
+
+//3
+struct RequestItem
+{
+    public Article Product;     // товар
+    public int Quantity;        // количество товара
+}
+
+//4
+struct Request
+{
+    public int RequestCode;         // код заказа
+    public Client Client;           // клиент
+    public DateTime RequestDate;    // дата заказа
+    public RequestItem[] Items;     // список товаров
+
+    // вычисляемое свойство суммы заказа
+    public double TotalSum
+    {
+        get
+        {
+            double sum = 0;
+
+            for (int i = 0; i < Items.Length; i++)
+            {
+                sum += Items[i].Product.Price * Items[i].Quantity;
+            }
+
+            return sum;
+        }
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        // товар
+        Article article = new Article();
+        article.ProductCode = 1;
+        article.ProductName = "Телевизор";
+        article.Price = 340000;
+
+        // клиент
+        Client client = new Client();
+        client.ClientCode = 100;
+        client.FullName = "Иванов Иван";
+        client.Address = "Москва";
+        client.Phone = "+79999999999";
+        client.OrderCount = 2;
+        client.TotalOrdersSum = 50000;
+
+        // элемент заказа
+        RequestItem item = new RequestItem();
+        item.Product = article;
+        item.Quantity = 2;
+
+        // заказ
+        Request request = new Request();
+        request.RequestCode = 555;
+        request.Client = client;
+        request.RequestDate = DateTime.Now;
+        request.Items = new RequestItem[] { item };
+
+        // ===== ВЫВОД =====
+
+        Console.WriteLine("1 Задание");
+
+        Console.WriteLine("Код товара: " + article.ProductCode);
+        Console.WriteLine("Название товара: " + article.ProductName);
+        Console.WriteLine("Цена товара: " + article.Price);
+
+        Console.WriteLine();
+
+        Console.WriteLine("2 Задание");
+
+        Console.WriteLine("Код клиента: " + client.ClientCode);
+        Console.WriteLine("ФИО: " + client.FullName);
+        Console.WriteLine("Адрес: " + client.Address);
+        Console.WriteLine("Телефон: " + client.Phone);
+        Console.WriteLine("Количество заказов: " + client.OrderCount);
+        Console.WriteLine("Общая сумма заказов: " + client.TotalOrdersSum);
+
+        Console.WriteLine();
+
+        Console.WriteLine("3 Задание");
+
+        Console.WriteLine("Товар: " + item.Product.ProductName);
+        Console.WriteLine("Количество товара: " + item.Quantity);
+
+        Console.WriteLine();
+
+        Console.WriteLine("4 Задание");
+
+        Console.WriteLine("Код заказа: " + request.RequestCode);
+        Console.WriteLine("Клиент: " + request.Client.FullName);
+        Console.WriteLine("Дата заказа: " + request.RequestDate);
+
+        Console.WriteLine("Товары в заказе:");
+        Console.WriteLine("Код товара: " + item.Product.ProductCode);
+        Console.WriteLine("Название товара: " + item.Product.ProductName);
+        Console.WriteLine("Цена товара: " + item.Product.Price);
+        Console.WriteLine("Количество: " + item.Quantity);
+
+        Console.WriteLine("Сумма заказа: " + request.TotalSum);
+    }
+}
