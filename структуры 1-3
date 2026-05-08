@@ -1,0 +1,128 @@
+using System;
+
+class Program
+{
+    //1
+    static void DrawSquare(int size, char symbol)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                Console.Write(symbol + " ");
+            }
+
+            Console.WriteLine();
+        }
+    }
+
+    // 2
+    static bool IsPalindrome(int number)
+    {
+        int original = number;
+        int reversed = 0;
+
+        while (number > 0)
+        {
+            int digit = number % 10;
+            reversed = reversed * 10 + digit;
+            number /= 10;
+        }
+
+        return original == reversed;
+    }
+
+    //3
+    static int[] FilterArray(int[] original, int[] filter)
+    {
+        int count = 0;
+
+        // считаем количество элементов
+        for (int i = 0; i < original.Length; i++)
+        {
+            bool found = false;
+
+            for (int j = 0; j < filter.Length; j++)
+            {
+                if (original[i] == filter[j])
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                count++;
+        }
+
+        int[] result = new int[count];
+        int index = 0;
+
+        // записываем элементы
+        for (int i = 0; i < original.Length; i++)
+        {
+            bool found = false;
+
+            for (int j = 0; j < filter.Length; j++)
+            {
+                if (original[i] == filter[j])
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                result[index] = original[i];
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    static void Main()
+    {
+        //1
+        Console.WriteLine("Задание 1");
+
+        DrawSquare(5, '*');
+
+        Console.WriteLine();
+
+        //2
+        Console.WriteLine("Задание 2");
+
+        int number = 1221;
+
+        if (IsPalindrome(number))
+            Console.WriteLine(number + " - палиндром");
+        else
+            Console.WriteLine(number + " - не палиндром");
+
+        Console.WriteLine();
+
+        //3
+        Console.WriteLine("Задание 3");
+
+        int[] original =
+        {
+            1, 2, 6, -1, 88, 7, 6
+        };
+
+        int[] filter =
+        {
+            6, 88, 7
+        };
+
+        int[] result = FilterArray(original, filter);
+
+        Console.WriteLine("Результат:");
+
+        for (int i = 0; i < result.Length; i++)
+        {
+            Console.Write(result[i] + " ");
+        }
+    }
+}
