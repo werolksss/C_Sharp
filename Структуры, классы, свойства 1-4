@@ -1,0 +1,137 @@
+using System;
+
+class CreditCard
+{
+    public string CardNumber;
+    public string FullName;
+    public string CVC;
+    public string ExpiryDate;
+
+    public CreditCard(string cardNumber, string fullName,
+                      string cvc, string expiryDate)
+    {
+        if (cardNumber.Length != 16)
+            throw new Exception("Неверный номер карты");
+
+        if (cvc.Length != 3)
+            throw new Exception("Неверный CVC");
+
+        CardNumber = cardNumber;
+        FullName = fullName;
+        CVC = cvc;
+        ExpiryDate = expiryDate;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        //1
+        Console.WriteLine("Задание 1");
+
+        try
+        {
+            Console.Write("Введите число: ");
+            string input = Console.ReadLine();
+
+            int number = int.Parse(input);
+
+            Console.WriteLine("Число: " + number);
+        }
+        catch (OverflowException)
+        {
+            Console.WriteLine("Число слишком большое");
+        }
+        catch (FormatException)
+        {
+            Console.WriteLine("Неверный ввод");
+        }
+
+        Console.WriteLine();
+
+        //2
+        Console.WriteLine("Задание 2");
+
+        try
+        {
+            Console.Write("Введите число из 0 и 1: ");
+            string binary = Console.ReadLine();
+
+            for (int i = 0; i < binary.Length; i++)
+            {
+                if (binary[i] != '0' && binary[i] != '1')
+                {
+                    throw new Exception("Можно вводить только 0 и 1");
+                }
+            }
+
+            int decimalNumber = Convert.ToInt32(binary, 2);
+
+            Console.WriteLine("Десятичное число: " + decimalNumber);
+        }
+        catch (OverflowException)
+        {
+            Console.WriteLine("Число слишком большое");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        Console.WriteLine();
+
+        //3
+        Console.WriteLine("Задание 3");
+
+        try
+        {
+            CreditCard card = new CreditCard(
+                "1234567812345678",
+                "Иванов Иван",
+                "123",
+                "12/28"
+            );
+
+            Console.WriteLine("Карта создана");
+            Console.WriteLine("Номер: " + card.CardNumber);
+            Console.WriteLine("Владелец: " + card.FullName);
+            Console.WriteLine("CVC: " + card.CVC);
+            Console.WriteLine("Срок действия: " + card.ExpiryDate);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        Console.WriteLine();
+
+        //4
+        Console.WriteLine("Задание 4");
+
+        try
+        {
+            Console.Write("Введите выражение: ");
+            string expression = Console.ReadLine();
+
+            string[] numbers = expression.Split('*');
+
+            int result = 1;
+
+            for (int i = 0; i < numbers.Length; i++)
+            {
+                result *= int.Parse(numbers[i]);
+            }
+
+            Console.WriteLine("Результат: " + result);
+        }
+        catch (FormatException)
+        {
+            Console.WriteLine("Неверное выражение");
+        }
+        catch (OverflowException)
+        {
+            Console.WriteLine("Слишком большое число");
+        }
+    }
+}
