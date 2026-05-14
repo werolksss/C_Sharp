@@ -1,0 +1,129 @@
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+Website site = new();
+Magazine magazine = new();
+Shop shop = new();
+
+Console.WriteLine("// 4 задание");
+site.Input();
+site.Print();
+
+Console.WriteLine("\n// 5 задание");
+magazine.Input();
+magazine.Print();
+
+Console.WriteLine("\n// 6 задание");
+shop.Input();
+shop.Print();
+
+// 4 задание
+class Website
+{
+    private string name = "";
+    private string url = "";
+    private string description = "";
+    private string ip = "";
+
+    public void Input()
+    {
+        Console.Write("Название сайта: ");
+        name = Console.ReadLine() ?? "";
+        Console.Write("Путь к сайту: ");
+        url = Console.ReadLine() ?? "";
+        Console.Write("Описание сайта: ");
+        description = Console.ReadLine() ?? "";
+        Console.Write("IP адрес сайта: ");
+        ip = Console.ReadLine() ?? "";
+    }
+
+    public void Print()
+    {
+        Console.WriteLine($"Сайт: {name}");
+        Console.WriteLine($"Путь: {url}");
+        Console.WriteLine($"Описание: {description}");
+        Console.WriteLine($"IP: {ip}");
+    }
+
+    public string GetName() { return name; }
+    public string GetUrl() { return url; }
+    public string GetDescription() { return description; }
+    public string GetIp() { return ip; }
+}
+
+// 5 задание
+class Magazine
+{
+    private string name = "";
+    private int year;
+    private string description = "";
+    private string phone = "";
+    private string email = "";
+
+    public void Input()
+    {
+        Console.Write("Название журнала: ");
+        name = Console.ReadLine() ?? "";
+        Console.Write("Год основания: ");
+        year = int.Parse(Console.ReadLine() ?? "0");
+        Console.Write("Описание журнала: ");
+        description = Console.ReadLine() ?? "";
+        Console.Write("Телефон: ");
+        phone = Console.ReadLine() ?? "";
+        Console.Write("E-mail: ");
+        email = Console.ReadLine() ?? "";
+    }
+
+    public void Print()
+    {
+        Console.WriteLine($"Журнал: {name}");
+        Console.WriteLine($"Год основания: {year}");
+        Console.WriteLine($"Описание: {description}");
+        Console.WriteLine($"Телефон: {phone}");
+        Console.WriteLine($"E-mail: {email}");
+    }
+
+    public string GetName() { return name; }
+    public int GetYear() { return year; }
+    public string GetDescription() { return description; }
+    public string GetPhone() { return phone; }
+    public string GetEmail() { return email; }
+}
+
+// 6 задание
+class Shop
+{
+    private string name = "";
+    private string address = "";
+    private string description = "";
+    private string phone = "";
+    private string email = "";
+
+    public void Input()
+    {
+        Console.Write("Название магазина: ");
+        name = Console.ReadLine() ?? "";
+        Console.Write("Адрес: ");
+        address = Console.ReadLine() ?? "";
+        Console.Write("Описание профиля магазина: ");
+        description = Console.ReadLine() ?? "";
+        Console.Write("Телефон: ");
+        phone = Console.ReadLine() ?? "";
+        Console.Write("E-mail: ");
+        email = Console.ReadLine() ?? "";
+    }
+
+    public void Print()
+    {
+        Console.WriteLine($"Магазин: {name}");
+        Console.WriteLine($"Адрес: {address}");
+        Console.WriteLine($"Описание: {description}");
+        Console.WriteLine($"Телефон: {phone}");
+        Console.WriteLine($"E-mail: {email}");
+    }
+
+    public string GetName() { return name; }
+    public string GetAddress() { return address; }
+    public string GetDescription() { return description; }
+    public string GetPhone() { return phone; }
+    public string GetEmail() { return email; }
+}
