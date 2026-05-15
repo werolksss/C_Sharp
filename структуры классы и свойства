@@ -1,0 +1,239 @@
+using System;
+
+// 5
+enum ArticleType
+{
+    Еда,
+    Одежда,
+    Техника,
+    Игрушки
+}
+//6
+enum ClientType
+{
+    Обычный,
+    Постоянный,
+    VIP
+}
+//7
+enum PayType
+{
+    Наличные,
+    Карта,
+    Онлайн
+}
+//Article
+struct Article
+{
+    public int Code;
+    public string Name;
+    public double Price;
+    public ArticleType Type;
+}
+// Client
+struct Client
+{
+    public int Code;
+    public string FullName;
+    public string Address;
+    public string Phone;
+    public int OrdersCount;
+    public double TotalOrdersSum;
+    public ClientType Type;
+}
+// RequestItem
+struct RequestItem
+{
+    public Article Product;
+    public int Count;
+}
+// 4
+struct Request
+{
+    public int RequestCode;
+    public Client Client;
+    public string Date;
+    public RequestItem[] Items;
+    public PayType Pay;
+    // вычисляемое свойство
+    public double TotalSum
+    {
+        get
+        {
+            double sum = 0;
+
+            for (int i = 0; i < Items.Length; i++)
+            {
+                sum += Items[i].Product.Price * Items[i].Count;
+            }
+
+            return sum;
+        }
+    }
+}
+//8
+class Student
+{
+    public string LastName;
+    public string FirstName;
+    public string MiddleName;
+    public string Group;
+    public int Age;
+    // зубчатый массив
+    public int[][] Marks;
+
+    public Student(string lastName, string firstName,
+        string middleName, string group, int age)
+    {
+        LastName = lastName;
+        FirstName = firstName;
+        MiddleName = middleName;
+        Group = group;
+        Age = age;
+        // 0 - программирование
+        // 1 - администрирование
+        // 2 - дизайн
+        Marks = new int[3][];
+        Marks[0] = new int[3];
+        Marks[1] = new int[3];
+        Marks[2] = new int[3];
+    }
+
+    // установка оценки
+    public void SetMark(int subject, int index, int mark)
+    {
+        Marks[subject][index] = mark;
+    }
+    // получение оценки
+    public int GetMark(int subject, int index)
+    {
+        return Marks[subject][index];
+    }
+    // средний балл
+    public double GetAverage(int subject)
+    {
+        int sum = 0;
+
+        for (int i = 0; i < Marks[subject].Length; i++)
+        {
+            sum += Marks[subject][i];
+        }
+
+        return (double)sum / Marks[subject].Length;
+    }
+    // вывод информации
+    public void ShowInfo()
+    {
+        Console.WriteLine("ФИО: " +
+            LastName + " " +
+            FirstName + " " +
+            MiddleName);
+
+        Console.WriteLine("Группа: " + Group);
+        Console.WriteLine("Возраст: " + Age);
+
+        Console.WriteLine("Средний балл по программированию: " +
+            GetAverage(0));
+
+        Console.WriteLine("Средний балл по администрированию: " +
+            GetAverage(1));
+
+        Console.WriteLine("Средний балл по дизайну: " +
+            GetAverage(2));
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        //товар
+        Article article = new Article();
+        article.Code = 1;
+        article.Name = "Ноутбук";
+        article.Price = 60000;
+        article.Type = ArticleType.Техника;
+
+        // клиент
+        Client client = new Client();
+        client.Code = 100;
+        client.FullName = "Иванов Иван";
+        client.Address = "Москва";
+        client.Phone = "+79999999999";
+        client.OrdersCount = 3;
+        client.TotalOrdersSum = 120000;
+        client.Type = ClientType.VIP;
+
+        // товар в заказе
+        RequestItem item = new RequestItem();
+        item.Product = article;
+        item.Count = 2;
+
+        // заказ
+        Request request = new Request();
+        request.RequestCode = 555;
+        request.Client = client;
+        request.Date = "15.05.2026";
+        request.Pay = PayType.Карта;
+
+        request.Items = new RequestItem[]
+        {
+            item
+        };
+
+        Console.WriteLine("Задание 4");
+
+        Console.WriteLine("Код заказа: " + request.RequestCode);
+        Console.WriteLine("Клиент: " + request.Client.FullName);
+        Console.WriteLine("Дата: " + request.Date);
+        Console.WriteLine("Способ оплаты: " + request.Pay);
+        Console.WriteLine("Сумма заказа: " + request.TotalSum);
+
+        Console.WriteLine();
+
+        Console.WriteLine("Задание 5");
+
+        Console.WriteLine("Тип товара: " + article.Type);
+
+        Console.WriteLine();
+
+        Console.WriteLine("Задание 6");
+
+        Console.WriteLine("Тип клиента: " + client.Type);
+
+        Console.WriteLine();
+
+        Console.WriteLine("Задание 7");
+
+        Console.WriteLine("Форма оплаты: " + request.Pay);
+
+        Console.WriteLine();
+
+        Console.WriteLine("Задание 8");
+
+        Student student = new Student(
+            "Петров",
+            "Иван",
+            "Александрович",
+            "П-21",
+            18
+        );
+
+        // программирование
+        student.SetMark(0, 0, 5);
+        student.SetMark(0, 1, 4);
+        student.SetMark(0, 2, 5);
+
+        // администрирование
+        student.SetMark(1, 0, 4);
+        student.SetMark(1, 1, 4);
+        student.SetMark(1, 2, 5);
+
+        // дизайн
+        student.SetMark(2, 0, 5);
+        student.SetMark(2, 1, 5);
+        student.SetMark(2, 2, 5);
+
+        student.ShowInfo();
+    }
+}
