@@ -1,0 +1,339 @@
+using System;
+
+//1
+
+class Human
+{
+    public string Name;
+    public int Age;
+
+    public Human(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public virtual void ShowInfo()
+    {
+        Console.WriteLine("Имя: " + Name);
+        Console.WriteLine("Возраст: " + Age);
+    }
+}
+
+class Builder : Human
+{
+    public string Company;
+
+    public Builder(string name, int age, string company)
+        : base(name, age)
+    {
+        Company = company;
+    }
+
+    public override void ShowInfo()
+    {
+        Console.WriteLine("Строитель");
+        base.ShowInfo();
+        Console.WriteLine("Компания: " + Company);
+    }
+}
+
+class Sailor : Human
+{
+    public string Ship;
+
+    public Sailor(string name, int age, string ship)
+        : base(name, age)
+    {
+        Ship = ship;
+    }
+
+    public override void ShowInfo()
+    {
+        Console.WriteLine("Моряк");
+        base.ShowInfo();
+        Console.WriteLine("Корабль: " + Ship);
+    }
+}
+
+class Pilot : Human
+{
+    public string Plane;
+
+    public Pilot(string name, int age, string plane)
+        : base(name, age)
+    {
+        Plane = plane;
+    }
+
+    public override void ShowInfo()
+    {
+        Console.WriteLine("Летчик");
+        base.ShowInfo();
+        Console.WriteLine("Самолет: " + Plane);
+    }
+}
+
+// 2
+
+class Passport
+{
+    public string FullName;
+    public string Country;
+    public string PassportNumber;
+
+    public Passport(string fullName, string country, string passportNumber)
+    {
+        FullName = fullName;
+        Country = country;
+        PassportNumber = passportNumber;
+    }
+
+    public virtual void ShowPassport()
+    {
+        Console.WriteLine("ФИО: " + FullName);
+        Console.WriteLine("Страна: " + Country);
+        Console.WriteLine("Номер паспорта: " + PassportNumber);
+    }
+}
+
+class ForeignPassport : Passport
+{
+    public string ForeignNumber;
+    public string Visa;
+
+    public ForeignPassport(string fullName, string country,
+        string passportNumber, string foreignNumber, string visa)
+        : base(fullName, country, passportNumber)
+    {
+        ForeignNumber = foreignNumber;
+        Visa = visa;
+    }
+
+    public override void ShowPassport()
+    {
+        Console.WriteLine("Загранпаспорт");
+        base.ShowPassport();
+        Console.WriteLine("Номер загранпаспорта: " + ForeignNumber);
+        Console.WriteLine("Виза: " + Visa);
+    }
+}
+
+//3
+
+class Animal
+{
+    public string Name;
+    public string Info;
+
+    public Animal(string name, string info)
+    {
+        Name = name;
+        Info = info;
+    }
+
+    public virtual void ShowAnimal()
+    {
+        Console.WriteLine("Название: " + Name);
+        Console.WriteLine("Описание: " + Info);
+    }
+}
+
+class Tiger : Animal
+{
+    public Tiger(string name, string info)
+        : base(name, info)
+    {
+    }
+
+    public override void ShowAnimal()
+    {
+        Console.WriteLine("Тигр");
+        base.ShowAnimal();
+    }
+}
+
+class Crocodile : Animal
+{
+    public Crocodile(string name, string info)
+        : base(name, info)
+    {
+    }
+
+    public override void ShowAnimal()
+    {
+        Console.WriteLine("Крокодил");
+        base.ShowAnimal();
+    }
+}
+
+class Kangaroo : Animal
+{
+    public Kangaroo(string name, string info)
+        : base(name, info)
+    {
+    }
+
+    public override void ShowAnimal()
+    {
+        Console.WriteLine("Кенгуру");
+        base.ShowAnimal();
+    }
+}
+
+// 4
+
+abstract class Figure
+{
+    public abstract double Area();
+}
+
+class Rectangle : Figure
+{
+    public double Width;
+    public double Height;
+
+    public Rectangle(double width, double height)
+    {
+        Width = width;
+        Height = height;
+    }
+
+    public override double Area()
+    {
+        return Width * Height;
+    }
+}
+
+class Circle : Figure
+{
+    public double Radius;
+
+    public Circle(double radius)
+    {
+        Radius = radius;
+    }
+
+    public override double Area()
+    {
+        return 3.14 * Radius * Radius;
+    }
+}
+
+class Triangle : Figure
+{
+    public double A;
+    public double H;
+
+    public Triangle(double a, double h)
+    {
+        A = a;
+        H = h;
+    }
+
+    public override double Area()
+    {
+        return A * H / 2;
+    }
+}
+
+class Trapezoid : Figure
+{
+    public double A;
+    public double B;
+    public double H;
+
+    public Trapezoid(double a, double b, double h)
+    {
+        A = a;
+        B = b;
+        H = h;
+    }
+
+    public override double Area()
+    {
+        return (A + B) * H / 2;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        //1
+
+        Console.WriteLine("Задание 1");
+
+        Builder builder = new Builder("Иван", 35, "СтройДом");
+        Sailor sailor = new Sailor("Алексей", 40, "Титаник");
+        Pilot pilot = new Pilot("Максим", 32, "Boeing 737");
+
+        builder.ShowInfo();
+
+        Console.WriteLine();
+
+        sailor.ShowInfo();
+
+        Console.WriteLine();
+
+        pilot.ShowInfo();
+
+        Console.WriteLine();
+
+
+        //2
+
+        Console.WriteLine("Задание 2");
+
+        ForeignPassport fp = new ForeignPassport(
+            "Иванов Иван",
+            "Россия",
+            "123456",
+            "AA987654",
+            "USA"
+        );
+
+        fp.ShowPassport();
+
+        Console.WriteLine();
+
+
+        //3
+
+        Console.WriteLine("Задание 3");
+
+        Tiger tiger = new Tiger("Амур", "Большой и сильный");
+        Crocodile crocodile = new Crocodile("Гена", "Опасный хищник");
+        Kangaroo kangaroo = new Kangaroo("Кен", "Быстро прыгает");
+
+        tiger.ShowAnimal();
+
+        Console.WriteLine();
+
+        crocodile.ShowAnimal();
+
+        Console.WriteLine();
+
+        kangaroo.ShowAnimal();
+
+        Console.WriteLine();
+
+
+        //4
+
+        Console.WriteLine("Задание 4");
+
+        Figure[] figures =
+        {
+            new Rectangle(5, 4),
+            new Circle(3),
+            new Triangle(6, 4),
+            new Trapezoid(4, 6, 5)
+        };
+
+        for (int i = 0; i < figures.Length; i++)
+        {
+            Console.WriteLine("Площадь фигуры: " + figures[i].Area());
+        }
+    }
+}
