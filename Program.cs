@@ -1,33 +1,23 @@
 ﻿using System;
 
+//интерфейс
+interface Figura
+{
+    double Ploshad();
+    double Perimetr();
+}
+
 //абстрактный класс
 abstract class GeomFig
 {
     public abstract double Ploshad();
     public abstract double Perimetr();
 }
-//интерфейс
-interface Figura
-{
-    double Visota { get; set; }
-    double Osnovanie { get; set; }
-    double Ugol { get; set; }
-
-    int KolichestvoStoron { get; set; }
-
-    double Ploshad();
-    double Perimetr();
-}
 
 //квадрат
 class Kvadrat : GeomFig, Figura
 {
     public double a;
-
-    public double Visota { get; set; }
-    public double Osnovanie { get; set; }
-    public double Ugol { get; set; }
-    public int KolichestvoStoron { get; set; }
 
     public Kvadrat(double storona)
     {
@@ -40,7 +30,6 @@ class Kvadrat : GeomFig, Figura
         {
             a = storona;
         }
-        KolichestvoStoron = 4;
     }
 
     public override double Ploshad()
@@ -61,11 +50,6 @@ class Treugolnik : GeomFig, Figura
     public double b;
     public double c;
 
-    public double Visota { get; set; }
-    public double Osnovanie { get; set; }
-    public double Ugol { get; set; }
-    public int KolichestvoStoron { get; set; }
-
     public Treugolnik(double x, double y, double z)
     {
         if (x + y <= z || x + z <= y || y + z <= x)
@@ -82,7 +66,6 @@ class Treugolnik : GeomFig, Figura
             b = y;
             c = z;
         }
-        KolichestvoStoron = 3;
     }
 
     public override double Ploshad()
@@ -102,12 +85,6 @@ class Romb : GeomFig, Figura
 {
     public double a;
     public double h;
-
-    public double Visota { get; set; }
-    public double Osnovanie { get; set; }
-    public double Ugol { get; set; }
-    public int KolichestvoStoron { get; set; } 
-    
     public Romb(double storona, double visota)
     {
         if (storona <= 0 || visota <= 0)
@@ -122,7 +99,6 @@ class Romb : GeomFig, Figura
             a = storona;
             h = visota;
         }
-        KolichestvoStoron = 4;
     }
     public override double Ploshad()
     {
@@ -132,17 +108,12 @@ class Romb : GeomFig, Figura
     {
         return a * 4;
     }
-}
+
     //прямоугольник
     class Pryamougolnik : GeomFig, Figura
     {
         public double a;
         public double b;
-
-        public double Visota { get; set; }
-        public double Osnovanie { get; set; }
-        public double Ugol { get; set; }
-        public int KolichestvoStoron { get; set; }
 
         public Pryamougolnik(double x, double y)
         {
@@ -158,7 +129,6 @@ class Romb : GeomFig, Figura
                 a = x;
                 b = y;
             }
-            KolichestvoStoron = 4;
         }
         public override double Ploshad()
         {
@@ -176,11 +146,6 @@ class Romb : GeomFig, Figura
         public double b;
         public double h;
 
-        public double Visota { get; set; }
-        public double Osnovanie { get; set; }
-        public double Ugol { get; set; }
-        public int KolichestvoStoron { get; set; }
-        
         public Paralelogram(double x, double y, double visota)
         {
             if (x <= 0 || y <= 0 || visota <= 0)
@@ -196,7 +161,6 @@ class Romb : GeomFig, Figura
                 b = y;
                 h = visota;
             }
-            KolichestvoStoron = 4;
         }
         public override double Ploshad()
         {
@@ -207,130 +171,6 @@ class Romb : GeomFig, Figura
             return 2 * (a + b);
         }
     }
-    //трапеция
-class Trapeciya : GeomFig, Figura
-{
-    public double a;
-    public double b;
-    public double c;
-    public double d;
-    public double h;
-
-    public double Visota { get; set; }
-    public double Osnovanie { get; set; }
-    public double Ugol { get; set; }
-    public int KolichestvoStoron { get; set; }
-
-    public Trapeciya(double x, double y, double z, double w, double visota)
-    {
-        if (x <= 0 || y <= 0 || z <= 0 || w <= 0 || visota <= 0)
-        {
-            Console.WriteLine("Ошибка");
-
-            a = 1;
-            b = 1;
-            c = 1;
-            d = 1;
-            h = 1;
-        }
-        else
-        {
-            a = x;
-            b = y;
-            c = z;
-            d = w;
-            h = visota;
-        }
-
-        KolichestvoStoron = 4;
-    }
-
-    public override double Ploshad()
-    {
-        return (a + b) * h / 2;
-    }
-
-    public override double Perimetr()
-    {
-        return a + b + c + d;
-    }
-}
-//круг
-class Krug : GeomFig, Figura
-{
-    public double r;
-
-    public double Visota { get; set; }
-    public double Osnovanie { get; set; }
-    public double Ugol { get; set; }
-    public int KolichestvoStoron { get; set; }
-
-    public Krug(double radius)
-    {
-        if (radius <= 0)
-        {
-            Console.WriteLine("Ошибка");
-
-            r = 1;
-        }
-        else
-        {
-            r = radius;
-        }
-
-        KolichestvoStoron = 0;
-    }
-
-    public override double Ploshad()
-    {
-        return Math.PI * r * r;
-    }
-
-    public override double Perimetr()
-    {
-        return 2 * Math.PI * r;
-    }
-}
-//эллипс
-class Ellips : GeomFig, Figura
-{
-    public double a;
-    public double b;
-
-    public double Visota { get; set; }
-    public double Osnovanie { get; set; }
-    public double Ugol { get; set; }
-    public int KolichestvoStoron { get; set; }
-
-    public Ellips(double x, double y)
-    {
-        if (x <= 0 || y <= 0)
-        {
-            Console.WriteLine("Ошибка");
-
-            a = 1;
-            b = 1;
-        }
-        else
-        {
-            a = x;
-            b = y;
-        }
-
-        KolichestvoStoron = 0;
-    }
-
-    public override double Ploshad()
-    {
-        return Math.PI * a * b;
-    }
-
-    public override double Perimetr()
-    {
-        return 2 * Math.PI * Math.Sqrt((a * a + b * b) / 2);
-    }
-}
-
     //составная фигура
     class SostFigura
     {
@@ -353,80 +193,63 @@ class Ellips : GeomFig, Figura
             return sum;
         }
     }
-
-//main
-class Program
-{
-    static void Main()
+    class Program
     {
-        Kvadrat k = new Kvadrat(6);
-        Console.WriteLine("Квадрат");
-        Console.WriteLine("Площадь " + k.Ploshad());
-        Console.WriteLine("Периметр " + k.Perimetr());
-
-        Console.WriteLine();
-
-        Treugolnik t = new Treugolnik(6, 6, 5);
-        Console.WriteLine("Треугольник");
-        Console.WriteLine("Площадь " + t.Ploshad());
-        Console.WriteLine("Периметр " + t.Perimetr());
-
-        Console.WriteLine();
-
-        Romb r = new Romb(6, 4);
-        Console.WriteLine("Ромб");
-        Console.WriteLine("Площадь " + r.Ploshad());
-        Console.WriteLine("Периметр " + r.Perimetr());
-
-        Console.WriteLine();
-
-        Pryamougolnik p = new Pryamougolnik(7, 4);
-        Console.WriteLine("Прямоугольник");
-        Console.WriteLine("Площадь " + p.Ploshad());
-        Console.WriteLine("Периметр " + p.Perimetr());
-
-        Console.WriteLine();
-
-        Paralelogram par = new Paralelogram(5, 3, 4);
-        Console.WriteLine("Параллелограмм");
-        Console.WriteLine("Площадь " + par.Ploshad());
-        Console.WriteLine("Периметр " + par.Perimetr());
-
-        Console.WriteLine();
-
-        Trapeciya tr = new Trapeciya(6, 4, 3, 3, 5);
-        Console.WriteLine("Трапеция");
-        Console.WriteLine("Площадь " + tr.Ploshad());
-        Console.WriteLine("Периметр " + tr.Perimetr());
-        
-        Console.WriteLine();
-
-        Krug kr = new Krug(5);
-        Console.WriteLine("Круг");
-        Console.WriteLine("Площадь " + kr.Ploshad());
-        Console.WriteLine("Периметр " + kr.Perimetr());
-       
-        Console.WriteLine();
-
-        Ellips e = new Ellips(6, 4);
-        Console.WriteLine("Эллипс");
-        Console.WriteLine("Площадь " + e.Ploshad());
-        Console.WriteLine("Периметр " + e.Perimetr());
-
-        Figura[] arr =
+        static void Main()
         {
+            Kvadrat k = new Kvadrat(6);
+
+            Console.WriteLine("Квадрат");
+            Console.WriteLine("Площадь " + k.Ploshad());
+            Console.WriteLine("Периметр " + k.Perimetr());
+
+            Console.WriteLine();
+
+            Treugolnik t = new Treugolnik(6, 6, 5);
+
+            Console.WriteLine("Треугольник");
+            Console.WriteLine("Площадь " + t.Ploshad());
+            Console.WriteLine("Периметр " + t.Perimetr());
+
+            Console.WriteLine();
+
+            Romb r = new Romb(6, 4);
+
+            Console.WriteLine("Ромб");
+            Console.WriteLine("Площадь " + r.Ploshad());
+            Console.WriteLine("Периметр " + r.Perimetr());
+
+            Console.WriteLine();
+
+            Pryamougolnik p = new Pryamougolnik(7, 4);
+
+            Console.WriteLine("Прямоугольник");
+            Console.WriteLine("Площадь " + p.Ploshad());
+            Console.WriteLine("Периметр " + p.Perimetr());
+
+            Console.WriteLine();
+
+            Paralelogram par = new Paralelogram(5, 3, 4);
+
+            Console.WriteLine("Параллелограмм");
+            Console.WriteLine("Площадь " + par.Ploshad());
+            Console.WriteLine("Периметр " + par.Perimetr());
+
+            Console.WriteLine();
+
+                Figura[] arr =
+            {
             k,
             t,
             r,
             p,
-            par,
-            tr,
-            kr,
-            e
+            par
         };
 
-        SostFigura sf = new SostFigura(arr);
+            SostFigura sf = new SostFigura(arr);
 
-        Console.WriteLine("Общая площадь " + sf.ObshayaPloshad());
+            Console.WriteLine("Общая площадь " + sf.ObshayaPloshad());
+
+        }
     }
 }
