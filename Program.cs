@@ -1,255 +1,247 @@
 ﻿using System;
 
-//интерфейс
-interface Figura
+//абстрактный класс товар
+abstract class Tovar
 {
-    double Ploshad();
-    double Perimetr();
-}
+    public string Nazvanie;
+    public double Cena;
+    public int Kolichestvo;
 
-//абстрактный класс
-abstract class GeomFig
-{
-    public abstract double Ploshad();
-    public abstract double Perimetr();
-}
-
-//квадрат
-class Kvadrat : GeomFig, Figura
-{
-    public double a;
-
-    public Kvadrat(double storona)
+    public Tovar(string nazvanie, double cena, int kolichestvo)
     {
-        if (storona <= 0)
+        if (cena <= 0 || kolichestvo < 0)
         {
-            Console.WriteLine("ошибка");
-            a = 1;
+            Console.WriteLine("Ошибка при создании товара");
+            Nazvanie = "Без названия";
+            Cena = 1;
+            Kolichestvo = 0;
         }
         else
         {
-            a = storona;
+            Nazvanie = nazvanie;
+            Cena = cena;
+            Kolichestvo = kolichestvo;
         }
     }
 
-    public override double Ploshad()
+    public virtual void Info()
     {
-        return a * a;
+        Console.WriteLine("Название: " + Nazvanie);
+        Console.WriteLine("Цена: " + Cena);
+        Console.WriteLine("Количество: " + Kolichestvo);
     }
 
-    public override double Perimetr()
+    public double Stoimost()
     {
-        return a * 4;
+        return Cena * Kolichestvo;
     }
 }
 
-//треугольник
-class Treugolnik : GeomFig, Figura
+//бытовая химия
+class BitovayaHimiya : Tovar
 {
-    public double a;
-    public double b;
-    public double c;
+    public string Tip;
+    public double Obem;
 
-    public Treugolnik(double x, double y, double z)
+    public BitovayaHimiya(string nazvanie, double cena, int kolichestvo, string tip, double obem)
+        : base(nazvanie, cena, kolichestvo)
     {
-        if (x + y <= z || x + z <= y || y + z <= x)
-        {
-            Console.WriteLine("такой треугольник нельзя создать");
+        Tip = tip;
 
-            a = 1;
-            b = 1;
-            c = 1;
+        if (obem <= 0)
+        {
+            Console.WriteLine("Ошибка объема");
+            Obem = 1;
         }
         else
         {
-            a = x;
-            b = y;
-            c = z;
+            Obem = obem;
         }
     }
 
-    public override double Ploshad()
+    public override void Info()
     {
-        double p = (a + b + c) / 2;
-
-        return Math.Sqrt(p * (p - a) * (p - b) * (p - c));
-    }
-
-    public override double Perimetr()
-    {
-        return a + b + c;
+        Console.WriteLine("Бытовая химия");
+        base.Info();
+        Console.WriteLine("Тип: " + Tip);
+        Console.WriteLine("Объем: " + Obem + " л");
     }
 }
-// ромб
-class Romb : GeomFig, Figura
-{
-    public double a;
-    public double h;
-    public Romb(double storona, double visota)
-    {
-        if (storona <= 0 || visota <= 0)
-        {
-            Console.WriteLine("Ошибка");
 
-            a = 1;
-            h = 1;
+//продукты питания
+class ProduktPitania : Tovar
+{
+    public string SrokGodnosti;
+    public double Ves;
+
+    public ProduktPitania(string nazvanie, double cena, int kolichestvo, string srokGodnosti, double ves)
+        : base(nazvanie, cena, kolichestvo)
+    {
+        SrokGodnosti = srokGodnosti;
+
+        if (ves <= 0)
+        {
+            Console.WriteLine("Ошибка веса");
+            Ves = 1;
         }
         else
         {
-            a = storona;
-            h = visota;
+            Ves = ves;
         }
     }
-    public override double Ploshad()
+
+    public override void Info()
     {
-        return a * h;
+        Console.WriteLine("Продукт питания");
+        base.Info();
+        Console.WriteLine("Срок годности: " + SrokGodnosti);
+        Console.WriteLine("Вес: " + Ves + " кг");
     }
-    public override double Perimetr()
+}
+
+//класс управления потоком товаров
+class PotokTovarov
+{
+    public Tovar[] Tovary;
+
+    public PotokTovarov(Tovar[] tovary)
     {
-        return a * 4;
+        Tovary = tovary;
     }
 
-    //прямоугольник
-    class Pryamougolnik : GeomFig, Figura
+    //пришло
+    public void Prishlo(Tovar tovar, int kolichestvo)
     {
-        public double a;
-        public double b;
-
-        public Pryamougolnik(double x, double y)
+        if (kolichestvo <= 0)
         {
-            if (x <= 0 || y <= 0)
-            {
-                Console.WriteLine("Ошибка");
-
-                a = 1;
-                b = 1;
-            }
-            else
-            {
-                a = x;
-                b = y;
-            }
+            Console.WriteLine("Ошибка: количество должно быть больше нуля");
         }
-        public override double Ploshad()
+        else
         {
-            return a * b;
-        }
-        public override double Perimetr()
-        {
-            return 2 * (a + b);
+            tovar.Kolichestvo += kolichestvo;
+            Console.WriteLine("Поступило товара: " + tovar.Nazvanie + " — " + kolichestvo + " шт.");
         }
     }
-    //параллелограмм
-    class Paralelogram : GeomFig, Figura
-    {
-        public double a;
-        public double b;
-        public double h;
 
-        public Paralelogram(double x, double y, double visota)
+    //реализовано
+    public void Realizovano(Tovar tovar, int kolichestvo)
+    {
+        if (kolichestvo <= 0)
         {
-            if (x <= 0 || y <= 0 || visota <= 0)
-            {
-                Console.WriteLine("Ошибка");
-                a = 1;
-                b = 1;
-                h = 1;
-            }
-            else
-            {
-                a = x;
-                b = y;
-                h = visota;
-            }
+            Console.WriteLine("Ошибка: количество должно быть больше нуля");
         }
-        public override double Ploshad()
+        else if (kolichestvo > tovar.Kolichestvo)
         {
-            return a * h;
+            Console.WriteLine("Ошибка: недостаточно товара для реализации");
         }
-        public override double Perimetr()
+        else
         {
-            return 2 * (a + b);
+            tovar.Kolichestvo -= kolichestvo;
+            Console.WriteLine("Реализовано товара: " + tovar.Nazvanie + " — " + kolichestvo + " шт.");
         }
     }
-    //составная фигура
-    class SostFigura
+
+    //списано
+    public void Spisano(Tovar tovar, int kolichestvo)
     {
-        public Figura[] figs;
-
-        public SostFigura(Figura[] f)
+        if (kolichestvo <= 0)
         {
-            figs = f;
+            Console.WriteLine("Ошибка: количество должно быть больше нуля");
         }
-
-        public double ObshayaPloshad()
+        else if (kolichestvo > tovar.Kolichestvo)
         {
-            double sum = 0;
-
-            for (int i = 0; i < figs.Length; i++)
-            {
-                sum += figs[i].Ploshad();
-            }
-
-            return sum;
+            Console.WriteLine("Ошибка: нельзя списать больше, чем есть на складе");
+        }
+        else
+        {
+            tovar.Kolichestvo -= kolichestvo;
+            Console.WriteLine("Списано товара: " + tovar.Nazvanie + " — " + kolichestvo + " шт.");
         }
     }
-    class Program
+
+    //передано
+    public void Peredano(Tovar tovar, int kolichestvo, string kuda)
     {
-        static void Main()
+        if (kolichestvo <= 0)
         {
-            Kvadrat k = new Kvadrat(6);
+            Console.WriteLine("Ошибка: количество должно быть больше нуля");
+        }
+        else if (kolichestvo > tovar.Kolichestvo)
+        {
+            Console.WriteLine("Ошибка: недостаточно товара для передачи");
+        }
+        else
+        {
+            tovar.Kolichestvo -= kolichestvo;
+            Console.WriteLine("Передано товара: " + tovar.Nazvanie + " — " + kolichestvo + " шт. Куда: " + kuda);
+        }
+    }
 
-            Console.WriteLine("Квадрат");
-            Console.WriteLine("Площадь " + k.Ploshad());
-            Console.WriteLine("Периметр " + k.Perimetr());
+    public void PokazatVseTovary()
+    {
+        Console.WriteLine("Список товаров:");
 
+        for (int i = 0; i < Tovary.Length; i++)
+        {
             Console.WriteLine();
+            Tovary[i].Info();
+            Console.WriteLine("Общая стоимость: " + Tovary[i].Stoimost());
+        }
+    }
 
-            Treugolnik t = new Treugolnik(6, 6, 5);
+    public double ObshayaStoimost()
+    {
+        double sum = 0;
 
-            Console.WriteLine("Треугольник");
-            Console.WriteLine("Площадь " + t.Ploshad());
-            Console.WriteLine("Периметр " + t.Perimetr());
+        for (int i = 0; i < Tovary.Length; i++)
+        {
+            sum += Tovary[i].Stoimost();
+        }
 
-            Console.WriteLine();
+        return sum;
+    }
+}
 
-            Romb r = new Romb(6, 4);
+//main
+class Program
+{
+    static void Main()
+    {
+        BitovayaHimiya poroshok = new BitovayaHimiya("Стиральный порошок", 450, 20, "Для стирки", 3);
+        BitovayaHimiya gel = new BitovayaHimiya("Гель для посуды", 180, 30, "Для кухни", 0.5);
 
-            Console.WriteLine("Ромб");
-            Console.WriteLine("Площадь " + r.Ploshad());
-            Console.WriteLine("Периметр " + r.Perimetr());
+        ProduktPitania moloko = new ProduktPitania("Молоко", 90, 40, "10 дней", 1);
+        ProduktPitania hleb = new ProduktPitania("Хлеб", 55, 25, "3 дня", 0.5);
 
-            Console.WriteLine();
-
-            Pryamougolnik p = new Pryamougolnik(7, 4);
-
-            Console.WriteLine("Прямоугольник");
-            Console.WriteLine("Площадь " + p.Ploshad());
-            Console.WriteLine("Периметр " + p.Perimetr());
-
-            Console.WriteLine();
-
-            Paralelogram par = new Paralelogram(5, 3, 4);
-
-            Console.WriteLine("Параллелограмм");
-            Console.WriteLine("Площадь " + par.Ploshad());
-            Console.WriteLine("Периметр " + par.Perimetr());
-
-            Console.WriteLine();
-
-                Figura[] arr =
-            {
-            k,
-            t,
-            r,
-            p,
-            par
+        Tovar[] arr =
+        {
+            poroshok,
+            gel,
+            moloko,
+            hleb
         };
 
-            SostFigura sf = new SostFigura(arr);
+        PotokTovarov potok = new PotokTovarov(arr);
 
-            Console.WriteLine("Общая площадь " + sf.ObshayaPloshad());
+        potok.PokazatVseTovary();
 
-        }
+        Console.WriteLine();
+        Console.WriteLine("Общая стоимость всех товаров: " + potok.ObshayaStoimost());
+
+        Console.WriteLine();
+        Console.WriteLine("Операции с товарами:");
+
+        potok.Prishlo(moloko, 10);
+        potok.Realizovano(hleb, 5);
+        potok.Spisano(gel, 3);
+        potok.Peredano(poroshok, 4, "Склад №2");
+
+        Console.WriteLine();
+        Console.WriteLine("После операций:");
+
+        potok.PokazatVseTovary();
+
+        Console.WriteLine();
+        Console.WriteLine("Общая стоимость после операций: " + potok.ObshayaStoimost());
     }
 }
