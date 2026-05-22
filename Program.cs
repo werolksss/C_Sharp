@@ -1,124 +1,69 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
 
-namespace Gonki
+namespace BezopasnoeDelenie
 {
-    // делегат
-    delegate void GonkaDelegate(string message);
-    // абстрактный класс
-    abstract class Avtomobil
-    {
-        public string Nazvanie { get; set; }
-        public int Speed { get; set; }
-        public int Distance { get; set; }
-
-        protected Random rnd = new Random();
-
-        // событие финиша
-        public event Action<string> Finish;
-
-        public Avtomobil(string name)
-        {
-            Nazvanie = name;
-            Distance = 0;
-        }
-
-        // метод движения
-        public virtual void Ehat()
-        {
-            Speed = rnd.Next(5, 20);
-            Distance += Speed;
-
-            Console.WriteLine($"{Nazvanie} проехал {Distance} км");
-
-            // проверка финиша
-            if (Distance >= 100)
-            {
-                Finish?.Invoke(Nazvanie);
-            }
-        }
-    }
-
-    // спортивная
-    class SportCar : Avtomobil
-    {
-        public SportCar(string name) : base(name) { }
-    }
-
-    // легковая
-    class Legkovaya : Avtomobil
-    {
-        public Legkovaya(string name) : base(name) { }
-    }
-
-    // грузовая
-    class Gruzovaya : Avtomobil
-    {
-        public Gruzovaya(string name) : base(name) { }
-    }
-
-    // автобус
-    class Avtobus : Avtomobil
-    {
-        public Avtobus(string name) : base(name) { }
-    }
-
     class Program
     {
-        static bool gameOver = false;
-
         static void Main(string[] args)
         {
-            GonkaDelegate start = StartMessage;
+            int[] results = new int[3];
+            int index = 0;
 
-            // машины
-            List<Avtomobil> cars = new List<Avtomobil>()
+            bool work = true;
+
+            while (work)
             {
-                new SportCar("Ferrari"),
-                new Legkovaya("Toyota"),
-                new Gruzovaya("Kamaz"),
-                new Avtobus("Scania ")
-            };
-
-            foreach (var car in cars)
-            {
-                car.Finish += FinishRace;
-            }
-
-            //старт
-            start("Гонка началась!");
-
-            //игра
-            while (!gameOver)
-            {
-                foreach (var car in cars)
+                try
                 {
-                    car.Ehat();
+                    Console.Write("Введите первое число: ");
+                    int num1 = Convert.ToInt32(Console.ReadLine());
 
-                    if (gameOver)
-                        break;
+                    Console.Write("Введите второе число: ");
+                    int num2 = Convert.ToInt32(Console.ReadLine());
+
+                    int result = num1 / num2;
+                    results[index] = result;
+                    index++;
+
+                    Console.WriteLine($"Результат: {result}");
+                }
+                catch (FormatException)
+                {
+                    Console.WriteLine("Ошибка: введите целое число");
+                }
+                catch (DivideByZeroException)
+                {
+                    Console.WriteLine("Ошибка: деление на ноль невозможно");
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    Console.WriteLine("Массив результатов заполнен, дальнейшие вычисления невозможны");
+                    break;
+                }
+                finally
+                {
+                    Console.WriteLine("Попытка выполнения операции завершена");
                 }
 
-                Console.WriteLine("--------------------------");
+                Console.Write("Хотите продолжить? (да/нет): ");
+                string answer = Console.ReadLine();
 
-                Thread.Sleep(500);
+                if (answer.ToLower() != "да")
+                {
+                    work = false;
+                }
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("Сохраненные результаты:");
+
+            for (int i = 0; i < index && i < results.Length; i++)
+            {
+                Console.WriteLine(results[i]);
             }
 
             Console.ReadKey();
-        }
-        // старт
-        static void StartMessage(string text)
-        {
-            Console.WriteLine(text);
-            Console.WriteLine();
-        }
-        // финиш
-        static void FinishRace(string winner)
-        {
-            Console.WriteLine();
-            Console.WriteLine($"Победитель: {winner}");
-            gameOver = true;
         }
     }
 }
