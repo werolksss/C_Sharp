@@ -1,68 +1,124 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Threading;
 
-namespace Statistika
+namespace Gonki
 {
+    // делегат
+    delegate void GonkaDelegate(string message);
+    // абстрактный класс
+    abstract class Avtomobil
+    {
+        public string Nazvanie { get; set; }
+        public int Speed { get; set; }
+        public int Distance { get; set; }
+
+        protected Random rnd = new Random();
+
+        // событие финиша
+        public event Action<string> Finish;
+
+        public Avtomobil(string name)
+        {
+            Nazvanie = name;
+            Distance = 0;
+        }
+
+        // метод движения
+        public virtual void Ehat()
+        {
+            Speed = rnd.Next(5, 20);
+            Distance += Speed;
+
+            Console.WriteLine($"{Nazvanie} проехал {Distance} км");
+
+            // проверка финиша
+            if (Distance >= 100)
+            {
+                Finish?.Invoke(Nazvanie);
+            }
+        }
+    }
+
+    // спортивная
+    class SportCar : Avtomobil
+    {
+        public SportCar(string name) : base(name) { }
+    }
+
+    // легковая
+    class Legkovaya : Avtomobil
+    {
+        public Legkovaya(string name) : base(name) { }
+    }
+
+    // грузовая
+    class Gruzovaya : Avtomobil
+    {
+        public Gruzovaya(string name) : base(name) { }
+    }
+
+    // автобус
+    class Avtobus : Avtomobil
+    {
+        public Avtobus(string name) : base(name) { }
+    }
+
     class Program
     {
+        static bool gameOver = false;
+
         static void Main(string[] args)
         {
-            // Текст
-            string text = @"Вот дом, Который построил Джек. 
-            А это пшеница, Которая в темном чулане хранится
-            В доме, Который построил Джек.
-            А это веселая птица-синица,
-            Которая часто ворует пшеницу, 
-            Которая в темном чулане хранится 
-            В доме, Который построил Джек.";
+            GonkaDelegate start = StartMessage;
 
-            Dictionary<string, int> slovar = PodschetSlov(text);
+            // машины
+            List<Avtomobil> cars = new List<Avtomobil>()
+            {
+                new SportCar("Ferrari"),
+                new Legkovaya("Toyota"),
+                new Gruzovaya("Kamaz"),
+                new Avtobus("Scania ")
+            };
 
-            VivodTablici(slovar);
+            foreach (var car in cars)
+            {
+                car.Finish += FinishRace;
+            }
+
+            //старт
+            start("Гонка началась!");
+
+            //игра
+            while (!gameOver)
+            {
+                foreach (var car in cars)
+                {
+                    car.Ehat();
+
+                    if (gameOver)
+                        break;
+                }
+
+                Console.WriteLine("--------------------------");
+
+                Thread.Sleep(500);
+            }
 
             Console.ReadKey();
         }
-        // метод подсчета слов
-        static Dictionary<string, int> PodschetSlov(string text)
+        // старт
+        static void StartMessage(string text)
         {
-            Dictionary<string, int> result = new Dictionary<string, int>();
-            // удаление знаков препинания
-            string textBezZnakov = Regex.Replace(text, @"[^\w\s]", "");
-            // разделение текста на слова
-            string[] slova = textBezZnakov.Split(
-                new char[] { ' ', '\n', '\r', '\t' },
-                StringSplitOptions.RemoveEmptyEntries
-            );
-            // подсчет слов
-            foreach (string slovo in slova)
-            {
-                string nizhniyRegistr = slovo.ToLower();
-
-                if (result.ContainsKey(nizhniyRegistr))
-                {
-                    result[nizhniyRegistr]++;
-                }
-                else
-                {
-                    result.Add(nizhniyRegistr, 1);
-                }
-            }
-
-            return result;
+            Console.WriteLine(text);
+            Console.WriteLine();
         }
-        static void VivodTablici(Dictionary<string, int> slovar)
+        // финиш
+        static void FinishRace(string winner)
         {
-            Console.WriteLine("Слово\t\tКоличество");
-            Console.WriteLine("--------------------------");
-
-            foreach (var element in slovar)
-            {
-                Console.WriteLine($"{element.Key}\t\t{element.Value}");
-            }
-
-            Console.WriteLine("--------------------------");
-            Console.WriteLine($"Уникальных слов: {slovar.Count}");
+            Console.WriteLine();
+            Console.WriteLine($"Победитель: {winner}");
+            gameOver = true;
         }
     }
 }
