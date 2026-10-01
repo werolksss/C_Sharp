@@ -1,0 +1,386 @@
+using System;
+using System.Data;
+using System.IO;
+using System.Text;
+using System.Windows.Forms;
+
+internal static class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new MainForm());
+    }
+}
+
+public class MainForm : Form
+{
+    ComboBox variants = new ComboBox();
+    DataGridView grid = new DataGridView();
+    Label info = new Label();
+
+    DataTable data = new DataTable();
+    DataTable result;
+
+    string folder = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+        "Практическая работа 9");
+
+    public MainForm()
+    {
+        Text = "Практическая работа 9. Типизированные файлы";
+        Width = 1000;
+        Height = 550;
+        StartPosition = FormStartPosition.CenterScreen;
+
+        FlowLayoutPanel panel = new FlowLayoutPanel();
+        panel.Dock = DockStyle.Top;
+        panel.Height = 80;
+        panel.Padding = new Padding(10);
+
+        variants.Width = 190;
+        variants.DropDownStyle = ComboBoxStyle.DropDownList;
+        variants.Items.AddRange(new object[]
+        {
+            "1. Студенты",
+            "10. Товары в магазине",
+            "17. Результаты ЕГЭ"
+        });
+        variants.SelectedIndex = 0;
+
+        Button create = new Button();
+        create.Text = "Создать файл";
+        create.Width = 140;
+
+        Button read = new Button();
+        read.Text = "Показать все";
+        read.Width = 140;
+
+        Button select = new Button();
+        select.Text = "Выполнить выборку";
+        select.Width = 160;
+
+        Button save = new Button();
+        save.Text = "Сохранить результат";
+        save.Width = 170;
+
+        panel.Controls.Add(variants);
+        panel.Controls.Add(create);
+        panel.Controls.Add(read);
+        panel.Controls.Add(select);
+        panel.Controls.Add(save);
+
+        grid.Dock = DockStyle.Fill;
+        grid.ReadOnly = true;
+        grid.AllowUserToAddRows = false;
+        grid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+        info.Dock = DockStyle.Bottom;
+        info.Height = 45;
+        info.Padding = new Padding(10);
+
+        Controls.Add(grid);
+        Controls.Add(panel);
+        Controls.Add(info);
+
+        create.Click += (s, e) => Run(CreateFile);
+        read.Click += (s, e) => Run(ShowAll);
+        select.Click += (s, e) => Run(SelectRecords);
+        save.Click += (s, e) => Run(SaveResult);
+
+        variants.SelectedIndexChanged += (s, e) =>
+        {
+            data = CreateTable();
+            result = null;
+            grid.DataSource = data;
+            info.Text = "Создайте файл или откройте существующий.";
+        };
+
+        data = CreateTable();
+        grid.DataSource = data;
+        info.Text = "Выберите вариант и нажмите «Создать файл».";
+    }
+
+    // Обработка ошибок при работе с файлами
+    void Run(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Ошибка: " + ex.Message);
+        }
+    }
+
+    string GetFilePath()
+    {
+        string[] names = { "students.dat", "products.dat", "exam.dat" };
+        return Path.Combine(folder, names[variants.SelectedIndex]);
+    }
+
+    // Создание таблицы с полями выбранного варианта
+    DataTable CreateTable()
+    {
+        DataTable table = new DataTable();
+
+        switch (variants.SelectedIndex)
+        {
+            case 0:
+                table.Columns.Add("ФИО", typeof(string));
+                table.Columns.Add("Год рождения", typeof(int));
+                table.Columns.Add("Адрес", typeof(string));
+                table.Columns.Add("Средний балл", typeof(decimal));
+                break;
+
+            case 1:
+                table.Columns.Add("Название", typeof(string));
+                table.Columns.Add("Цена", typeof(decimal));
+                table.Columns.Add("Количество", typeof(int));
+                table.Columns.Add("Дата поступления", typeof(DateTime));
+                break;
+
+            case 2:
+                table.Columns.Add("ФИО", typeof(string));
+                table.Columns.Add("Предмет", typeof(string));
+                table.Columns.Add("Балл", typeof(int));
+                break;
+        }
+
+        return table;
+    }
+
+    void CreateFile()
+    {
+        Directory.CreateDirectory(folder);
+        DataTable table = CreateTable();
+
+        switch (variants.SelectedIndex)
+        {
+            case 0:
+                table.Rows.Add("Лафуткина Дарья", 2008,
+                    "Чита, ул. Ленина, 15", 4.7m);
+                table.Rows.Add("Устимов Артём", 2007,
+                    "Чита, ул. Чкалова, 20", 3.8m);
+                table.Rows.Add("Дружинина Алина", 2008,
+                    "Чита, ул. Бутина, 8", 4.2m);
+                table.Rows.Add("Милогородцев Илья", 2007,
+                    "Чита, ул. Амурская, 12", 3.5m);
+                break;
+
+            case 1:
+                table.Rows.Add("Клавиатура", 1800m, 8,
+                    new DateTime(2026, 9, 10));
+                table.Rows.Add("Мышь", 750m, 15,
+                    new DateTime(2026, 9, 11));
+                table.Rows.Add("Монитор", 12500m, 4,
+                    new DateTime(2026, 9, 12));
+                table.Rows.Add("Наушники", 1000m, 10,
+                    new DateTime(2026, 9, 13));
+                break;
+
+            case 2:
+                table.Rows.Add("Лафуткина Дарья", "Информатика", 92);
+                table.Rows.Add("Устимов Артём", "Математика", 80);
+                table.Rows.Add("Дружинина Алина", "Русский язык", 87);
+                table.Rows.Add("Милогородцев Илья", "Физика", 74);
+                break;
+        }
+
+        using (FileStream stream = new FileStream(
+            GetFilePath(), FileMode.Create, FileAccess.Write))
+        using (BinaryWriter writer = new BinaryWriter(stream))
+        {
+            foreach (DataRow row in table.Rows)
+            {
+                foreach (DataColumn column in table.Columns)
+                {
+                    object value = row[column];
+
+                    if (column.DataType == typeof(string))
+                    {
+                        // Каждая строка занимает ровно 200 байт:
+                        // 100 символов по 2 байта.
+                        string text = ((string)value).PadRight(100, '\0');
+
+                        for (int i = 0; i < 100; i++)
+                            writer.Write((ushort)text[i]);
+                    }
+                    else if (column.DataType == typeof(int))
+                    {
+                        writer.Write((int)value);
+                    }
+                    else if (column.DataType == typeof(decimal))
+                    {
+                        writer.Write((decimal)value);
+                    }
+                    else if (column.DataType == typeof(DateTime))
+                    {
+                        writer.Write(((DateTime)value).Ticks);
+                    }
+                }
+            }
+        }
+
+        ShowAll();
+        info.Text = "Файл создан: " + GetFilePath();
+    }
+
+    // Чтение записей из двоичного файла
+    void ReadFile()
+    {
+        if (!File.Exists(GetFilePath()))
+            throw new Exception("Сначала нажмите «Создать файл».");
+
+        DataTable table = CreateTable();
+
+        using (FileStream stream = new FileStream(
+            GetFilePath(), FileMode.Open, FileAccess.Read))
+        using (BinaryReader reader = new BinaryReader(stream))
+        {
+            while (stream.Position < stream.Length)
+            {
+                object[] values = new object[table.Columns.Count];
+
+                for (int i = 0; i < table.Columns.Count; i++)
+                {
+                    Type type = table.Columns[i].DataType;
+
+                    if (type == typeof(string))
+                    {
+                        char[] chars = new char[100];
+
+                        for (int j = 0; j < 100; j++)
+                            chars[j] = (char)reader.ReadUInt16();
+
+                        values[i] = new string(chars).TrimEnd('\0');
+                    }
+                    else if (type == typeof(int))
+                    {
+                        values[i] = reader.ReadInt32();
+                    }
+                    else if (type == typeof(decimal))
+                    {
+                        values[i] = reader.ReadDecimal();
+                    }
+                    else if (type == typeof(DateTime))
+                    {
+                        values[i] = new DateTime(reader.ReadInt64());
+                    }
+                }
+
+                table.Rows.Add(values);
+            }
+        }
+
+        data = table;
+    }
+
+    void ShowAll()
+    {
+        ReadFile();
+        result = null;
+        grid.DataSource = data;
+        FormatGrid();
+        info.Text = "Всего записей: " + data.Rows.Count;
+    }
+
+    // Выборка по условию выбранного варианта
+    void SelectRecords()
+    {
+        ReadFile();
+        result = data.Clone();
+
+        foreach (DataRow row in data.Rows)
+        {
+            bool suitable = false;
+
+            switch (variants.SelectedIndex)
+            {
+                case 0:
+                    suitable = (decimal)row["Средний балл"] > 3.8m;
+                    break;
+
+                case 1:
+                    suitable = (decimal)row["Цена"] > 1000m;
+                    break;
+
+                case 2:
+                    suitable = (int)row["Балл"] > 80;
+                    break;
+            }
+
+            if (suitable)
+                result.ImportRow(row);
+        }
+
+        grid.DataSource = result;
+        FormatGrid();
+
+        string[] conditions =
+        {
+            "Средний балл > 3,8",
+            "Цена > 1000 руб.",
+            "Балл > 80"
+        };
+
+        info.Text = conditions[variants.SelectedIndex]
+            + ". Найдено записей: " + result.Rows.Count;
+    }
+
+    void FormatGrid()
+    {
+        if (grid.Columns.Contains("Дата поступления"))
+            grid.Columns["Дата поступления"].DefaultCellStyle.Format =
+                "dd.MM.yyyy";
+    }
+
+    // Сохранение выборки в отдельный текстовый файл
+    void SaveResult()
+    {
+        if (result == null)
+            SelectRecords();
+
+        string path = Path.Combine(folder,
+            Path.GetFileNameWithoutExtension(GetFilePath())
+            + "_result.txt");
+
+        using (StreamWriter writer = new StreamWriter(
+            path, false, Encoding.UTF8))
+        {
+            writer.WriteLine(variants.SelectedItem);
+            writer.WriteLine();
+
+            string[] headers = new string[result.Columns.Count];
+
+            for (int i = 0; i < result.Columns.Count; i++)
+                headers[i] = result.Columns[i].ColumnName;
+
+            writer.WriteLine(string.Join(" | ", headers));
+
+            foreach (DataRow row in result.Rows)
+            {
+                string[] values = new string[result.Columns.Count];
+
+                for (int i = 0; i < result.Columns.Count; i++)
+                {
+                    if (row[i] is DateTime)
+                        values[i] = ((DateTime)row[i]).ToString("dd.MM.yyyy");
+                    else
+                        values[i] = Convert.ToString(row[i]);
+                }
+
+                writer.WriteLine(string.Join(" | ", values));
+            }
+
+            writer.WriteLine();
+            writer.WriteLine("Найдено записей: " + result.Rows.Count);
+        }
+
+        info.Text = "Результат сохранён: " + path;
+        MessageBox.Show("Результат сохранён:\n" + path);
+    }
+}
