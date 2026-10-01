@@ -1,0 +1,537 @@
+using System;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
+
+internal static class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new MainForm());
+    }
+}
+
+public class MainForm : Form
+{
+    readonly string folder = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+        "Практическая работа 10");
+
+    readonly Random random = new Random();
+
+    public MainForm()
+    {
+        Text = "Практическая работа 10. Нетипизированные файлы";
+        ClientSize = new Size(1000, 600);
+        MinimumSize = new Size(850, 450);
+        StartPosition = FormStartPosition.CenterScreen;
+        Font = new Font("Segoe UI", 10);
+
+        TabControl tabs = new TabControl();
+        tabs.Dock = DockStyle.Fill;
+        Controls.Add(tabs);
+
+        CreateStudentsTab(tabs);
+        CreateNumbersTab(tabs);
+        CreateBooksTab(tabs);
+        CreateMatrixTab(tabs);
+    }
+
+    // Создание вкладки с таблицей и панелью кнопок
+    DataGridView CreateTab(
+        TabControl tabs,
+        string title,
+        DataTable table,
+        out FlowLayoutPanel buttons,
+        out Label status)
+    {
+        TabPage page = new TabPage(title);
+        page.Padding = new Padding(10);
+        tabs.TabPages.Add(page);
+
+        buttons = new FlowLayoutPanel();
+        buttons.Dock = DockStyle.Top;
+        buttons.Height = 65;
+        buttons.Padding = new Padding(0, 8, 0, 0);
+
+        status = new Label();
+        status.Dock = DockStyle.Bottom;
+        status.Height = 65;
+        status.Padding = new Padding(0, 8, 0, 0);
+        status.AutoEllipsis = true;
+
+        DataGridView grid = new DataGridView();
+        grid.Dock = DockStyle.Fill;
+        grid.DataSource = table;
+        grid.AutoSizeColumnsMode =
+            DataGridViewAutoSizeColumnsMode.Fill;
+        grid.BackgroundColor = Color.White;
+        grid.RowHeadersWidth = 45;
+
+        page.Controls.Add(grid);
+        page.Controls.Add(buttons);
+        page.Controls.Add(status);
+
+        return grid;
+    }
+
+    void AddButton(
+        FlowLayoutPanel panel,
+        string text,
+        Action action)
+    {
+        Button button = new Button();
+        button.Text = text;
+        button.AutoSize = true;
+        button.Height = 36;
+        button.Margin = new Padding(0, 0, 10, 0);
+
+        button.Click += (sender, args) =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Ошибка",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        };
+
+        panel.Controls.Add(button);
+    }
+
+    string GetPath(string name)
+    {
+        Directory.CreateDirectory(folder);
+        return Path.Combine(folder, name);
+    }
+
+    void CheckFile(string path)
+    {
+        if (!File.Exists(path))
+            throw new Exception("Сначала запишите данные в файл.");
+    }
+
+    // Завершение редактирования таблицы перед сохранением
+    void FinishEditing(DataGridView grid)
+    {
+        if (!grid.EndEdit())
+            throw new Exception("Проверьте введённые данные.");
+
+        CurrencyManager manager =
+            (CurrencyManager)grid.BindingContext[grid.DataSource];
+
+        manager.EndCurrentEdit();
+    }
+
+    void CheckRows(DataTable table)
+    {
+        foreach (DataRow row in table.Rows)
+        {
+            foreach (DataColumn column in table.Columns)
+            {
+                if (row.IsNull(column))
+                    throw new Exception("Заполните все поля таблицы.");
+
+                if (column.DataType == typeof(string) &&
+                    string.IsNullOrWhiteSpace((string)row[column]))
+                {
+                    throw new Exception("Текстовые поля не должны быть пустыми.");
+                }
+            }
+        }
+    }
+
+    // Вариант 1. Студенты
+    void CreateStudentsTab(TabControl tabs)
+    {
+        DataTable table = new DataTable();
+        table.Columns.Add("ФИО", typeof(string));
+        table.Columns.Add("Возраст", typeof(int));
+        table.Columns.Add("Средний балл", typeof(double));
+
+        table.Rows.Add("Лафуткина Дарья", 18, 4.7);
+        table.Rows.Add("Устимов Артём", 19, 3.8);
+        table.Rows.Add("Дружинина Алина", 18, 4.2);
+        table.Rows.Add("Милогородцев Илья", 19, 3.5);
+
+        FlowLayoutPanel buttons;
+        Label status;
+
+        DataGridView grid = CreateTab(
+            tabs, "1. Студенты", table, out buttons, out status);
+
+        grid.Columns["Средний балл"].DefaultCellStyle.Format = "0.00";
+
+        AddButton(buttons, "Записать в файл", () =>
+        {
+            FinishEditing(grid);
+            CheckRows(table);
+
+            foreach (DataRow row in table.Rows)
+            {
+                if ((int)row["Возраст"] <= 0 ||
+                    (double)row["Средний балл"] < 0 ||
+                    (double)row["Средний балл"] > 5)
+                {
+                    throw new Exception(
+                        "Возраст должен быть больше 0, балл — от 0 до 5.");
+                }
+            }
+
+            string path = GetPath("students.bin");
+
+            using (FileStream stream = new FileStream(
+                path, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                writer.Write(table.Rows.Count);
+
+                foreach (DataRow row in table.Rows)
+                {
+                    writer.Write((string)row["ФИО"]);
+                    writer.Write((int)row["Возраст"]);
+                    writer.Write((double)row["Средний балл"]);
+                }
+            }
+
+            status.Text = "Сохранено студентов: " +
+                table.Rows.Count + "\n" + path;
+        });
+
+        AddButton(buttons, "Прочитать из файла", () =>
+        {
+            string path = GetPath("students.bin");
+            CheckFile(path);
+            DataTable loaded = table.Clone();
+
+            using (FileStream stream = new FileStream(
+                path, FileMode.Open, FileAccess.Read))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                int count = reader.ReadInt32();
+
+                for (int i = 0; i < count; i++)
+                {
+                    string name = reader.ReadString();
+                    int age = reader.ReadInt32();
+                    double grade = reader.ReadDouble();
+
+                    loaded.Rows.Add(name, age, grade);
+                }
+            }
+
+            table = loaded;
+            grid.DataSource = table;
+            grid.Columns["Средний балл"].DefaultCellStyle.Format = "0.00";
+            status.Text = "Прочитано студентов: " + table.Rows.Count;
+        });
+
+        status.Text =
+            "Можно изменять данные и добавлять студентов в нижней строке таблицы.";
+    }
+
+    // Вариант 2. Случайные вещественные числа
+    void CreateNumbersTab(TabControl tabs)
+    {
+        DataTable table = new DataTable();
+        table.Columns.Add("Номер", typeof(int));
+        table.Columns.Add("Число", typeof(double));
+
+        FlowLayoutPanel buttons;
+        Label status;
+
+        DataGridView grid = CreateTab(
+            tabs, "2. Случайные числа", table, out buttons, out status);
+
+        grid.ReadOnly = true;
+        grid.AllowUserToAddRows = false;
+        grid.AllowUserToDeleteRows = false;
+        grid.Columns["Число"].DefaultCellStyle.Format = "0.0000";
+
+        AddButton(buttons, "Создать и записать 100 чисел", () =>
+        {
+            string path = GetPath("numbers.bin");
+            table.Clear();
+
+            using (FileStream stream = new FileStream(
+                path, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                writer.Write(100);
+
+                for (int i = 0; i < 100; i++)
+                {
+                    double number = random.NextDouble() * 100;
+                    writer.Write(number);
+                    table.Rows.Add(i + 1, number);
+                }
+            }
+
+            status.Text = "Создано 100 чисел от 0 до 100.\n" + path;
+        });
+
+        AddButton(buttons, "Прочитать и вычислить", () =>
+        {
+            string path = GetPath("numbers.bin");
+            CheckFile(path);
+            DataTable loaded = table.Clone();
+            double sum = 0;
+
+            using (FileStream stream = new FileStream(
+                path, FileMode.Open, FileAccess.Read))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                int count = reader.ReadInt32();
+
+                if (count != 100)
+                    throw new Exception("В файле должно быть 100 чисел.");
+
+                for (int i = 0; i < count; i++)
+                {
+                    double number = reader.ReadDouble();
+                    sum += number;
+                    loaded.Rows.Add(i + 1, number);
+                }
+            }
+
+            table = loaded;
+            grid.DataSource = table;
+            grid.Columns["Число"].DefaultCellStyle.Format = "0.0000";
+
+            status.Text = "Сумма: " + sum.ToString("F4") +
+                "\nСреднее арифметическое: " +
+                (sum / table.Rows.Count).ToString("F4");
+        });
+
+        status.Text = "Создайте файл, затем прочитайте его для вычисления суммы и среднего.";
+    }
+
+    // Вариант 3. Библиотека
+    void CreateBooksTab(TabControl tabs)
+    {
+        DataTable table = new DataTable();
+        table.Columns.Add("Название", typeof(string));
+        table.Columns.Add("Автор", typeof(string));
+        table.Columns.Add("Год издания", typeof(int));
+        table.Columns.Add("Цена", typeof(decimal));
+
+        table.Rows.Add("Мастер и Маргарита", "Михаил Булгаков", 1999, 650m);
+        table.Rows.Add("Маленький принц", "Антуан де Сент-Экзюпери", 2005, 420m);
+        table.Rows.Add("Гарри Поттер", "Джоан Роулинг", 2018, 950m);
+        table.Rows.Add("Евгений Онегин", "Александр Пушкин", 2000, 380m);
+
+        FlowLayoutPanel buttons;
+        Label status;
+
+        DataGridView grid = CreateTab(
+            tabs, "3. Библиотека", table, out buttons, out status);
+
+        grid.Columns["Цена"].DefaultCellStyle.Format = "0.00";
+
+        AddButton(buttons, "Записать в файл", () =>
+        {
+            FinishEditing(grid);
+
+            // При активном поиске сохраняются все книги.
+            grid.DataSource = table;
+            CheckRows(table);
+
+            foreach (DataRow row in table.Rows)
+            {
+                if ((int)row["Год издания"] <= 0 ||
+                    (decimal)row["Цена"] < 0)
+                {
+                    throw new Exception(
+                        "Год должен быть больше 0, цена — неотрицательной.");
+                }
+            }
+
+            string path = GetPath("books.bin");
+
+            using (FileStream stream = new FileStream(
+                path, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                writer.Write(table.Rows.Count);
+
+                foreach (DataRow row in table.Rows)
+                {
+                    writer.Write((string)row["Название"]);
+                    writer.Write((string)row["Автор"]);
+                    writer.Write((int)row["Год издания"]);
+                    writer.Write((decimal)row["Цена"]);
+                }
+            }
+
+            status.Text = "Сохранено книг: " + table.Rows.Count +
+                "\n" + path;
+        });
+
+        Action readBooks = () =>
+        {
+            string path = GetPath("books.bin");
+            CheckFile(path);
+            DataTable loaded = table.Clone();
+
+            using (FileStream stream = new FileStream(
+                path, FileMode.Open, FileAccess.Read))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                int count = reader.ReadInt32();
+
+                for (int i = 0; i < count; i++)
+                {
+                    string title = reader.ReadString();
+                    string author = reader.ReadString();
+                    int year = reader.ReadInt32();
+                    decimal price = reader.ReadDecimal();
+
+                    loaded.Rows.Add(title, author, year, price);
+                }
+            }
+
+            table = loaded;
+            grid.DataSource = table;
+            grid.ReadOnly = false;
+            grid.AllowUserToAddRows = true;
+            grid.AllowUserToDeleteRows = true;
+            grid.Columns["Цена"].DefaultCellStyle.Format = "0.00";
+            status.Text = "Прочитано книг: " + table.Rows.Count;
+        };
+
+        AddButton(buttons, "Прочитать все книги", readBooks);
+
+        AddButton(buttons, "Найти книги после 2000 года", () =>
+        {
+            readBooks();
+
+            DataView view = new DataView(table);
+            view.RowFilter = "[Год издания] > 2000";
+
+            grid.DataSource = view;
+            grid.ReadOnly = true;
+            grid.AllowUserToAddRows = false;
+            grid.AllowUserToDeleteRows = false;
+            grid.Columns["Цена"].DefaultCellStyle.Format = "0.00";
+
+            status.Text = "Книги, изданные после 2000 года. Найдено: " +
+                view.Count + "\nДля редактирования нажмите «Прочитать все книги».";
+        });
+
+        status.Text =
+            "Можно изменить книги в таблице. Поиск выполняется по данным из файла.";
+    }
+
+    // Вариант 4. Матрица 5 × 5
+    void CreateMatrixTab(TabControl tabs)
+    {
+        DataTable table = new DataTable();
+
+        for (int i = 0; i < 5; i++)
+            table.Columns.Add("Столбец " + (i + 1), typeof(int));
+
+        FlowLayoutPanel buttons;
+        Label status;
+
+        DataGridView grid = CreateTab(
+            tabs, "4. Матрица", table, out buttons, out status);
+
+        grid.ReadOnly = true;
+        grid.AllowUserToAddRows = false;
+        grid.AllowUserToDeleteRows = false;
+        grid.RowTemplate.Height = 45;
+
+        AddButton(buttons, "Создать и записать матрицу", () =>
+        {
+            string path = GetPath("matrix.bin");
+            table.Clear();
+
+            using (FileStream stream = new FileStream(
+                path, FileMode.Create, FileAccess.Write))
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                writer.Write(5);
+                writer.Write(5);
+
+                for (int i = 0; i < 5; i++)
+                {
+                    object[] row = new object[5];
+
+                    for (int j = 0; j < 5; j++)
+                    {
+                        int number = random.Next(1, 100);
+                        writer.Write(number);
+                        row[j] = number;
+                    }
+
+                    table.Rows.Add(row);
+                }
+            }
+
+            HighlightDiagonal(grid);
+            status.Text = "Матрица 5 × 5 записана в файл.\n" + path;
+        });
+
+        AddButton(buttons, "Прочитать и найти сумму", () =>
+        {
+            string path = GetPath("matrix.bin");
+            CheckFile(path);
+            DataTable loaded = table.Clone();
+            int sum = 0;
+
+            using (FileStream stream = new FileStream(
+                path, FileMode.Open, FileAccess.Read))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                int rows = reader.ReadInt32();
+                int columns = reader.ReadInt32();
+
+                if (rows != 5 || columns != 5)
+                    throw new Exception("В файле должна быть матрица 5 × 5.");
+
+                for (int i = 0; i < rows; i++)
+                {
+                    object[] row = new object[columns];
+
+                    for (int j = 0; j < columns; j++)
+                    {
+                        int number = reader.ReadInt32();
+                        row[j] = number;
+
+                        if (i == j)
+                            sum += number;
+                    }
+
+                    loaded.Rows.Add(row);
+                }
+            }
+
+            table = loaded;
+            grid.DataSource = table;
+            HighlightDiagonal(grid);
+
+            status.Text = "Сумма элементов главной диагонали: " + sum;
+        });
+
+        status.Text = "Элементы главной диагонали выделяются зелёным цветом.";
+    }
+
+    void HighlightDiagonal(DataGridView grid)
+    {
+        for (int i = 0; i < 5 && i < grid.Rows.Count; i++)
+        {
+            grid.Rows[i].Cells[i].Style.BackColor = Color.LightGreen;
+            grid.Rows[i].Cells[i].Style.SelectionBackColor = Color.SeaGreen;
+        }
+    }
+}
