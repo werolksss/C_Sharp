@@ -1,0 +1,510 @@
+using System;
+using System.Drawing;
+using System.Globalization;
+using System.Windows.Forms;
+
+static class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new MainForm());
+    }
+}
+
+class MainForm : Form
+{
+    static readonly Random random = new Random();
+    readonly TabControl tabs = new TabControl { Dock = DockStyle.Fill };
+
+    public MainForm()
+    {
+        Text = "Практическая работа №12 — Организация функций";
+        ClientSize = new Size(850, 650);
+        MinimumSize = new Size(700, 500);
+        StartPosition = FormStartPosition.CenterScreen;
+        Font = new Font("Segoe UI", 10);
+        tabs.Multiline = true;
+        Controls.Add(tabs);
+
+        CreateExample();
+        CreateTask1();
+        CreateTask2();
+        CreateTask3();
+        CreateTask4();
+        CreateTask5();
+        CreateTask6();
+        CreateTask7();
+        CreateTask8();
+        CreateTask9();
+        CreateTask10();
+    }
+
+    // Методы для создания интерфейса
+    FlowLayoutPanel Page(string title)
+    {
+        var page = new TabPage(title);
+        var panel = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            FlowDirection = FlowDirection.TopDown,
+            WrapContents = false,
+            AutoScroll = true,
+            Padding = new Padding(15)
+        };
+        page.Controls.Add(panel);
+        tabs.TabPages.Add(page);
+        return panel;
+    }
+
+    Label Label(FlowLayoutPanel panel, string text)
+    {
+        var label = new Label
+        {
+            Text = text,
+            AutoSize = true,
+            MaximumSize = new Size(740, 0),
+            Margin = new Padding(3, 8, 3, 8)
+        };
+        panel.Controls.Add(label);
+        return label;
+    }
+
+    TextBox Input(FlowLayoutPanel panel, string title, string value = "")
+    {
+        Label(panel, title);
+        var input = new TextBox { Width = 500, Text = value };
+        panel.Controls.Add(input);
+        return input;
+    }
+
+    NumericUpDown Number(FlowLayoutPanel panel, string title,
+        int min, int max, int value)
+    {
+        Label(panel, title);
+        var input = new NumericUpDown
+        {
+            Minimum = min,
+            Maximum = max,
+            Value = value,
+            Width = 180
+        };
+        panel.Controls.Add(input);
+        return input;
+    }
+
+    ListBox List(FlowLayoutPanel panel)
+    {
+        var list = new ListBox
+        {
+            Width = 650,
+            Height = 200,
+            HorizontalScrollbar = true
+        };
+        panel.Controls.Add(list);
+        return list;
+    }
+
+    void Button(FlowLayoutPanel panel, string title, Action action)
+    {
+        var button = new Button
+        {
+            Text = title,
+            AutoSize = true,
+            Margin = new Padding(3, 12, 3, 12)
+        };
+        button.Click += delegate
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception error)
+            {
+                MessageBox.Show(error.Message, "Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        };
+        panel.Controls.Add(button);
+    }
+
+    static double ReadDouble(TextBox input)
+    {
+        double value;
+        string text = input.Text.Trim().Replace(',', '.');
+
+        if (!double.TryParse(text, NumberStyles.Float,
+                CultureInfo.InvariantCulture, out value) ||
+            double.IsNaN(value) || double.IsInfinity(value))
+            throw new ArgumentException("Введите корректное конечное число.");
+
+        return value;
+    }
+
+    static int ReadInt(TextBox input)
+    {
+        int value;
+        if (!int.TryParse(input.Text.Trim(), out value))
+            throw new ArgumentException("Введите целое число.");
+        return value;
+    }
+
+    // Пример из документа: площади фигур
+    static double CalculateArea(double radius)
+    {
+        if (radius < 0)
+            throw new ArgumentException("Радиус не может быть отрицательным.");
+        return Math.PI * radius * radius;
+    }
+
+    static double CalculateArea(double width, double height)
+    {
+        if (width < 0 || height < 0)
+            throw new ArgumentException("Размеры не могут быть отрицательными.");
+        return width * height;
+    }
+
+    static double CalculateTriangle(double basis, double height)
+    {
+        return CalculateArea(basis, height) / 2;
+    }
+
+    void CreateExample()
+    {
+        var p = Page("Пример: площади");
+        Label(p, "Выберите фигуру:");
+        var cmbFigure = new ComboBox
+        {
+            Name = "cmbFigure",
+            Width = 300,
+            DropDownStyle = ComboBoxStyle.DropDownList
+        };
+        cmbFigure.Items.AddRange(new object[]
+            { "Круг", "Прямоугольник", "Треугольник" });
+        cmbFigure.SelectedIndex = 0;
+        p.Controls.Add(cmbFigure);
+
+        var firstLabel = Label(p, "Радиус:");
+        var txtParam1 = new TextBox { Name = "txtParam1", Width = 300 };
+        p.Controls.Add(txtParam1);
+        var secondLabel = Label(p, "Второй параметр:");
+        var txtParam2 = new TextBox { Name = "txtParam2", Width = 300 };
+        p.Controls.Add(txtParam2);
+        var lblResult = Label(p, "Результат:");
+        lblResult.Name = "lblResult";
+
+        Action update = delegate
+        {
+            int index = cmbFigure.SelectedIndex;
+            firstLabel.Text = index == 0 ? "Радиус:" :
+                index == 1 ? "Длина:" : "Основание:";
+            secondLabel.Text = index == 1 ? "Ширина:" : "Высота:";
+            secondLabel.Visible = txtParam2.Visible = index != 0;
+        };
+        cmbFigure.SelectedIndexChanged += delegate { update(); };
+        update();
+
+        Button(p, "Вычислить", delegate
+        {
+            double a = ReadDouble(txtParam1);
+            double area;
+
+            if (cmbFigure.SelectedIndex == 0)
+                area = CalculateArea(a);
+            else
+            {
+                double b = ReadDouble(txtParam2);
+                area = cmbFigure.SelectedIndex == 1
+                    ? CalculateArea(a, b) : CalculateTriangle(a, b);
+            }
+
+            lblResult.Text = "Площадь: " + area.ToString("G10");
+        });
+    }
+
+    // Задача 1. Простые числа
+    static bool IsPrime(int n)
+    {
+        if (n < 2) return false;
+        for (int i = 2; i <= n / i; i++)
+            if (n % i == 0) return false;
+        return true;
+    }
+
+    void CreateTask1()
+    {
+        var p = Page("1. Простые");
+        var limit = Number(p, "Найти простые числа до N включительно:", 1, 100000, 100);
+        var result = List(p);
+        Button(p, "Найти", delegate
+        {
+            result.Items.Clear();
+            for (int n = 1; n <= (int)limit.Value; n++)
+                if (IsPrime(n)) result.Items.Add(n);
+        });
+    }
+
+    // Задача 2. Двоичная система
+    static string ConvertToBinary(int n)
+    {
+        // Для отрицательных чисел выводим знак и двоичный модуль.
+        return n < 0
+            ? "-" + Convert.ToString(-(long)n, 2)
+            : Convert.ToString(n, 2);
+    }
+
+    void CreateTask2()
+    {
+        var p = Page("2. Двоичная");
+        var input = Input(p, "Целое число:");
+        var result = Label(p, "Результат:");
+        Button(p, "Перевести", delegate
+        {
+            result.Text = "Двоичное представление: " + ConvertToBinary(ReadInt(input));
+        });
+    }
+
+    // Задача 3. Сортировка массива
+    static void SortArray(int[] arr)
+    {
+        Array.Sort(arr);
+    }
+
+    void CreateTask3()
+    {
+        var p = Page("3. Сортировка");
+        var input = Input(p, "Целые числа через пробел:", "8 3 9 1 5");
+        var result = List(p);
+        Button(p, "Сортировать", delegate
+        {
+            string[] parts = input.Text.Split(
+                new[] { ' ', '\t', '\r', '\n' },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length == 0)
+                throw new ArgumentException("Введите элементы массива.");
+
+            int[] array = new int[parts.Length];
+            for (int i = 0; i < parts.Length; i++)
+                if (!int.TryParse(parts[i], out array[i]))
+                    throw new ArgumentException("Все элементы должны быть целыми числами.");
+
+            string original = string.Join(" ", array);
+            SortArray(array);
+
+            result.Items.Clear();
+            result.Items.Add("Исходный: " + original);
+            result.Items.Add("Отсортированный: " + string.Join(" ", array));
+        });
+    }
+
+    // Задача 4. Необязательный параметр pi
+    static double CalculateCircle(double r, double pi = 3.14)
+    {
+        if (r < 0 || pi <= 0)
+            throw new ArgumentException("Радиус должен быть ≥ 0, Пи — > 0.");
+        return pi * r * r;
+    }
+
+    void CreateTask4()
+    {
+        var p = Page("4. Круг");
+        var radius = Input(p, "Радиус:");
+        var pi = Input(p, "Пи (пустое поле — 3.14):");
+        var result = Label(p, "Результат:");
+        Button(p, "Вычислить", delegate
+        {
+            double r = ReadDouble(radius);
+            double area = string.IsNullOrWhiteSpace(pi.Text)
+                ? CalculateCircle(r) : CalculateCircle(r, ReadDouble(pi));
+            result.Text = "Площадь: " + area.ToString("G10");
+        });
+    }
+
+    // Задача 5. Замена символа
+    static string ReplaceChar(string str, char oldChar, char newChar)
+    {
+        return str.Replace(oldChar, newChar);
+    }
+
+    void CreateTask5()
+    {
+        var p = Page("5. Замена");
+        var text = Input(p, "Строка:");
+        var oldChar = Input(p, "Старый символ:");
+        var newChar = Input(p, "Новый символ:");
+        var result = Label(p, "Результат:");
+        Button(p, "Заменить", delegate
+        {
+            if (oldChar.Text.Length != 1 || newChar.Text.Length != 1)
+                throw new ArgumentException("Введите ровно по одному символу.");
+
+            result.Text = "Результат: " +
+                ReplaceChar(text.Text, oldChar.Text[0], newChar.Text[0]);
+        });
+    }
+
+    // Задача 6. Подсчёт гласных
+    static int CountVowels(string text)
+    {
+        const string vowels = "аеёиоуыэюяaeiou";
+        int count = 0;
+        foreach (char c in text.ToLowerInvariant())
+            if (vowels.IndexOf(c) >= 0) count++;
+        return count;
+    }
+
+    void CreateTask6()
+    {
+        var p = Page("6. Гласные");
+        var text = Input(p, "Текст:");
+        var result = Label(p, "Результат:");
+        Button(p, "Посчитать", delegate
+        {
+            result.Text = "Количество гласных: " + CountVowels(text.Text);
+        });
+    }
+
+    // Задача 7. Матрица
+    static int[,] GetMatrix(int rows, int cols)
+    {
+        if (rows <= 0 || cols <= 0)
+            throw new ArgumentException("Размеры должны быть положительными.");
+
+        int[,] matrix = new int[rows, cols];
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                matrix[i, j] = random.Next(0, 101);
+        return matrix;
+    }
+
+    static void PrintMatrix(int[,] m, DataGridView dgv)
+    {
+        dgv.Rows.Clear();
+        dgv.Columns.Clear();
+
+        for (int j = 0; j < m.GetLength(1); j++)
+            dgv.Columns.Add("column" + j, (j + 1).ToString());
+
+        dgv.RowCount = m.GetLength(0);
+        for (int i = 0; i < m.GetLength(0); i++)
+            for (int j = 0; j < m.GetLength(1); j++)
+                dgv.Rows[i].Cells[j].Value = m[i, j];
+    }
+
+    void CreateTask7()
+    {
+        var p = Page("7. Матрица");
+        var rows = Number(p, "Строки:", 1, 30, 5);
+        var cols = Number(p, "Столбцы:", 1, 30, 5);
+        var grid = new DataGridView
+        {
+            Width = 730,
+            Height = 300,
+            ReadOnly = true,
+            AllowUserToAddRows = false,
+            AllowUserToDeleteRows = false,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells
+        };
+        p.Controls.Add(grid);
+        Button(p, "Создать матрицу (числа 0–100)", delegate
+        {
+            PrintMatrix(GetMatrix((int)rows.Value, (int)cols.Value), grid);
+        });
+    }
+
+    // Задача 8. Совершенные числа
+    static bool IsPerfectNumber(int n)
+    {
+        if (n < 2) return false;
+        long sum = 1;
+
+        for (int i = 2; i <= n / i; i++)
+        {
+            if (n % i != 0) continue;
+            sum += i;
+            if (i != n / i) sum += n / i;
+        }
+
+        return sum == n;
+    }
+
+    void CreateTask8()
+    {
+        var p = Page("8. Совершенные");
+        var limit = Number(p, "Предел поиска включительно:", 1, 100000, 10000);
+        var result = List(p);
+        Button(p, "Найти", delegate
+        {
+            result.Items.Clear();
+            for (int n = 1; n <= (int)limit.Value; n++)
+                if (IsPerfectNumber(n)) result.Items.Add(n);
+            if (result.Items.Count == 0)
+                result.Items.Add("Совершенные числа не найдены.");
+        });
+    }
+
+    // Задача 9. Генерация массива
+    static int[] GetRandomArray(int size, int min, int max)
+    {
+        if (size <= 0 || min > max)
+            throw new ArgumentException("Размер должен быть > 0, min ≤ max.");
+        if (max == int.MaxValue)
+            throw new ArgumentException("Максимум должен быть меньше int.MaxValue.");
+
+        int[] array = new int[size];
+        for (int i = 0; i < size; i++)
+            array[i] = random.Next(min, max + 1);
+        return array;
+    }
+
+    void CreateTask9()
+    {
+        var p = Page("9. Массив");
+        var size = Number(p, "Размер:", 1, 10000, 15);
+        var min = Number(p, "Минимум:", -1000000, 1000000, -30);
+        var max = Number(p, "Максимум:", -1000000, 1000000, 30);
+        var result = List(p);
+        Button(p, "Сгенерировать", delegate
+        {
+            int[] array = GetRandomArray(
+                (int)size.Value, (int)min.Value, (int)max.Value);
+
+            result.Items.Clear();
+            foreach (int value in array) result.Items.Add(value);
+        });
+    }
+
+    // Задача 10. Ежегодная капитализация
+    static double CalculateDeposit(double sum, double rate, int years = 1)
+    {
+        if (sum < 0 || rate < 0 || years < 0)
+            throw new ArgumentException("Сумма, ставка и срок должны быть ≥ 0.");
+
+        double result = sum * Math.Pow(1 + rate / 100, years);
+        if (double.IsInfinity(result) || double.IsNaN(result))
+            throw new ArithmeticException("Результат слишком большой.");
+        return result;
+    }
+
+    void CreateTask10()
+    {
+        var p = Page("10. Вклад");
+        var sum = Input(p, "Начальная сумма:");
+        var rate = Input(p, "Годовая ставка, %:");
+        var years = Input(p, "Количество лет (пустое поле — 1):");
+        var result = Label(p, "Результат:");
+        Button(p, "Вычислить", delegate
+        {
+            double s = ReadDouble(sum);
+            double r = ReadDouble(rate);
+            double total = string.IsNullOrWhiteSpace(years.Text)
+                ? CalculateDeposit(s, r)
+                : CalculateDeposit(s, r, ReadInt(years));
+
+            result.Text = "Итоговая сумма: " + total.ToString("F2");
+        });
+    }
+}
