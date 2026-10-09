@@ -1,0 +1,416 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+
+class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        Application.Run(new Tasks());
+    }
+}
+
+class Tasks : Form
+{
+    TabControl tabs = new TabControl { Dock = DockStyle.Fill };
+    Random random = new Random();
+
+    FlowLayoutPanel Page(string title)
+    {
+        var p = new FlowLayoutPanel {
+            Dock = DockStyle.Fill, AutoScroll = true,
+            FlowDirection = FlowDirection.TopDown,
+            WrapContents = false, Padding = new Padding(10)
+        };
+        var t = new TabPage(title);
+        t.Controls.Add(p); tabs.TabPages.Add(t);
+        return p;
+    }
+
+    T Add<T>(FlowLayoutPanel p, T c) where T : Control
+    {
+        p.Controls.Add(c); return c;
+    }
+
+    Label L(FlowLayoutPanel p, string s = "") =>
+        Add(p, new Label { Text = s, AutoSize = true,
+            MaximumSize = new Size(700, 0) });
+
+    TextBox T(FlowLayoutPanel p, string title)
+    {
+        L(p, title);
+        return Add(p, new TextBox { Width = 650 });
+    }
+
+    ListBox List(FlowLayoutPanel p) =>
+        Add(p, new ListBox { Width = 700, Height = 150,
+            HorizontalScrollbar = true });
+
+    ComboBox Combo(FlowLayoutPanel p, params string[] items)
+    {
+        var c = Add(p, new ComboBox { Width = 300,
+            DropDownStyle = ComboBoxStyle.DropDownList });
+        c.Items.AddRange(items); c.SelectedIndex = 0;
+        return c;
+    }
+
+    CheckBox Check(FlowLayoutPanel p, string s) =>
+        Add(p, new CheckBox { Text = s, AutoSize = true });
+
+    void B(FlowLayoutPanel p, string title, Action action)
+    {
+        var b = Add(p, new Button { Text = title, AutoSize = true });
+        b.Click += (s, e) => {
+            try { action(); }
+            catch (Exception x) { MessageBox.Show(x.Message, "Ошибка"); }
+        };
+    }
+
+    int N(TextBox t, int min = int.MinValue, int max = int.MaxValue)
+    {
+        int n;
+        if (!int.TryParse(t.Text, out n) || n < min || n > max)
+            throw new Exception($"Нужно целое число от {min} до {max}.");
+        return n;
+    }
+
+    int[] ArrayInput(TextBox t)
+    {
+        var parts = t.Text.Split((char[])null,
+            StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length < 1 || parts.Length > 1000)
+            throw new Exception("Введите 1–1000 целых чисел.");
+        return Array.ConvertAll(parts, int.Parse);
+    }
+
+    string TextInput(TextBox t)
+    {
+        if (t.Text.Length > 1000)
+            throw new Exception("Максимум 1000 символов.");
+        return t.Text;
+    }
+
+    void Clear(FlowLayoutPanel p, Action extra = null)
+    {
+        B(p, "Очистить", () => {
+            foreach (Control c in p.Controls) {
+                if (c is TextBox) c.Text = "";
+                if (c is ListBox) ((ListBox)c).Items.Clear();
+            }
+            if (extra != null) extra();
+        });
+    }
+
+    // Рекурсивные алгоритмы
+    int Ones(int n) => n == 0 ? 0 : n % 2 + Ones(n / 2);
+
+    string Scheme(int n) => n == 0 ? "" :
+        $"{n} : 2 = {n / 2}, остаток {n % 2}\n" + Scheme(n / 2);
+
+    void Parts(int n, int m, int min, string s, ListBox list)
+    {
+        if (m == 0) {
+            if (n == 0) list.Items.Add(s);
+            return;
+        }
+        for (int x = min; x <= n / m; x++)
+            Parts(n - x, m - 1, x,
+                s + (s == "" ? "" : " + ") + x, list);
+    }
+
+    int Reverse(int[] a, int l, int r)
+    {
+        if (l >= r) return 1;
+        int t = a[l]; a[l] = a[r]; a[r] = t;
+        return 1 + Reverse(a, l + 1, r - 1);
+    }
+
+    void Walk(TreeNode n, int type, ListBox list)
+    {
+        if (type == 0) list.Items.Add(n.Text);
+        if (n.Nodes.Count > 0) Walk(n.Nodes[0], type, list);
+        if (type == 2) list.Items.Add(n.Text);
+        if (n.Nodes.Count > 1) Walk(n.Nodes[1], type, list);
+        if (type == 1) list.Items.Add(n.Text);
+    }
+
+    int Linear(int[] a, int x, int i = 0) =>
+        i == a.Length ? -1 : a[i] == x ? i : Linear(a, x, i + 1);
+
+    int Binary(int[] a, int x, int l, int r)
+    {
+        if (l > r) return -1;
+        int m = l + (r - l) / 2;
+        return a[m] == x ? m : x < a[m]
+            ? Binary(a, x, l, m - 1) : Binary(a, x, m + 1, r);
+    }
+
+    bool Palindrome(string s, int l, int r, bool ignore)
+    {
+        if (l >= r) return true;
+        if (ignore && char.IsWhiteSpace(s[l]))
+            return Palindrome(s, l + 1, r, ignore);
+        if (ignore && char.IsWhiteSpace(s[r]))
+            return Palindrome(s, l, r - 1, ignore);
+        return (ignore
+            ? char.ToLowerInvariant(s[l]) == char.ToLowerInvariant(s[r])
+            : s[l] == s[r]) && Palindrome(s, l + 1, r - 1, ignore);
+    }
+
+    double Sum(int n, ListBox list)
+    {
+        if (n == 0) return 0;
+        double s = Sum(n - 1, list) + 1.0 / n;
+        list.Items.Add($"S({n}) = {s:G12}");
+        return s;
+    }
+
+    string ConvertBase(long n, int b, ListBox list)
+    {
+        list.Items.Add($"{n} : {b} = {n / b}, остаток {n % b}");
+        string digit = "0123456789ABCDEF"[(int)(n % b)].ToString();
+        return n < b ? digit : ConvertBase(n / b, b, list) + digit;
+    }
+
+    int Vowels(string s, int i, bool ru, ListBox list)
+    {
+        if (i == s.Length) return 0;
+        bool found = (ru ? "аеёиоуыэюя" : "аеёиоуыэюяaeiou")
+            .Contains(char.ToLowerInvariant(s[i]));
+        if (found) list.Items.Add(s[i]);
+        return (found ? 1 : 0) + Vowels(s, i + 1, ru, list);
+    }
+
+    bool Path(int[,] a, int r, int c, List<Point> path)
+    {
+        if (r == 5 || c == 5 || a[r, c] == 1) return false;
+        path.Add(new Point(c, r));
+        if ((r == 4 && c == 4) ||
+            Path(a, r, c + 1, path) || Path(a, r + 1, c, path))
+            return true;
+        path.RemoveAt(path.Count - 1);
+        return false;
+    }
+
+    public Tasks()
+    {
+        Text = "Практическая №13";
+        ClientSize = new Size(800, 700);
+        StartPosition = FormStartPosition.CenterScreen;
+        Controls.Add(tabs);
+
+        // 1. Единицы и схема деления
+        {
+            var p = Page("1. Единицы");
+            var t = T(p, "Натуральное число:");
+            var binary = L(p); var count = L(p);
+            var pic = Add(p, new PictureBox {
+                Width = 700, Height = 550, BorderStyle = BorderStyle.FixedSingle
+            });
+            Action dispose = () => {
+                var old = pic.Image; pic.Image = null;
+                if (old != null) old.Dispose();
+            };
+            B(p, "Подсчитать", () => {
+                int n = N(t, 1);
+                binary.Text = "Двоичная запись: " + Convert.ToString(n, 2);
+                count.Text = "Единиц: " + Ones(n);
+                var image = new Bitmap(700, 550);
+                using (var g = Graphics.FromImage(image))
+                using (var font = new Font("Consolas", 10)) {
+                    g.Clear(Color.White);
+                    g.DrawString(Scheme(n), font, Brushes.Black, 5, 5);
+                }
+                dispose(); pic.Image = image;
+            });
+            Clear(p, () => { binary.Text = count.Text = ""; dispose(); });
+            pic.Disposed += (s, e) => dispose();
+        }
+
+        // 2. Разложения
+        {
+            var p = Page("2. Разложения");
+            var n = T(p, "N (1–30):"); var m = T(p, "M (1–30):");
+            var list = List(p); var result = L(p);
+            B(p, "Найти разложения", () => {
+                int x = N(n, 1, 30), y = N(m, 1, 30);
+                list.Items.Clear(); Parts(x, y, 1, "", list);
+                result.Text = "Найдено: " + list.Items.Count;
+            });
+            Clear(p, () => result.Text = "");
+        }
+
+        // 3. Переворот
+        {
+            var p = Page("3. Переворот");
+            var t = T(p, "Массив через пробел:");
+            var list = List(p); var result = L(p);
+            int[] a = null;
+            B(p, "Заполнить массив", () => {
+                a = ArrayInput(t); list.Items.Clear(); result.Text = "";
+                list.Items.Add("Исходный: " + string.Join(" ", a));
+            });
+            B(p, "Перевернуть", () => {
+                if (a == null) throw new Exception("Сначала заполните массив.");
+                result.Text = "Рекурсивных вызовов: " + Reverse(a, 0, a.Length - 1);
+                list.Items.Add("Перевёрнутый: " + string.Join(" ", a));
+            });
+            Clear(p, () => { a = null; result.Text = ""; });
+        }
+
+        // 4. Бинарное дерево
+        {
+            var p = Page("4. Дерево");
+            L(p, "Выберите родителя. Первый ребёнок — левый, второй — правый.");
+            var t = T(p, "Название узла:");
+            var tree = Add(p, new TreeView { Width = 700, Height = 180 });
+            var type = Combo(p, "Прямой", "Обратный", "Симметричный");
+            var list = List(p);
+            B(p, "Добавить узел", () => {
+                if (t.Text.Trim() == "") throw new Exception("Введите название.");
+                if (tree.GetNodeCount(true) >= 100) throw new Exception("Максимум 100 узлов.");
+                var parent = tree.SelectedNode;
+                if (parent == null && tree.Nodes.Count > 0)
+                    throw new Exception("Выберите родителя.");
+                if (parent != null && parent.Nodes.Count == 2)
+                    throw new Exception("У родителя уже два ребёнка.");
+                if (parent == null) tree.Nodes.Add(t.Text);
+                else { parent.Nodes.Add(t.Text); parent.Expand(); }
+                t.Clear();
+            });
+            B(p, "Обойти дерево", () => {
+                list.Items.Clear();
+                if (tree.Nodes.Count > 0) Walk(tree.Nodes[0], type.SelectedIndex, list);
+            });
+            Clear(p, () => tree.Nodes.Clear());
+        }
+
+        // 5. Поиск
+        {
+            var p = Page("5. Поиск");
+            var t = T(p, "Массив:"); var x = T(p, "Искомое число:");
+            var result = L(p);
+            Func<int, string> position = i => i < 0 ? "не найден" : "индекс " + i;
+            B(p, "Найти", () => {
+                var a = ArrayInput(t); int n = N(x), i = Linear(a, n);
+                Array.Sort(a);
+                result.Text = "Индексы с 0.\nЛинейный: " + position(i) +
+                    "\nОтсортированный: " + string.Join(" ", a) +
+                    "\nБинарный: " + position(Binary(a, n, 0, a.Length - 1));
+            });
+            Clear(p, () => result.Text = "");
+        }
+
+        // 6. Палиндром
+        {
+            var p = Page("6. Палиндром");
+            var t = T(p, "Строка:");
+            var ignore = Check(p, "Игнорировать пробелы и регистр");
+            var result = L(p);
+            B(p, "Проверить", () => {
+                string s = TextInput(t);
+                result.Text = Palindrome(s, 0, s.Length - 1, ignore.Checked)
+                    ? "Палиндром" : "Не палиндром";
+            });
+            Clear(p, () => { result.Text = ""; ignore.Checked = false; });
+        }
+
+        // 7. Сумма ряда
+        {
+            var p = Page("7. Ряд");
+            L(p, "N:");
+            var n = Add(p, new NumericUpDown {
+                Minimum = 1, Maximum = 1000, Value = 10
+            });
+            var list = List(p); var result = L(p); var count = L(p);
+            B(p, "Вычислить", () => {
+                list.Items.Clear();
+                result.Text = "Сумма: " + Sum((int)n.Value, list).ToString("G12");
+                count.Text = "Слагаемых: " + n.Value;
+            });
+            Clear(p, () => { n.Value = 10; result.Text = count.Text = ""; });
+        }
+
+        // 8. Системы счисления
+        {
+            var p = Page("8. Системы");
+            var t = T(p, "Целое число:");
+            var basis = Combo(p, "2", "8", "16");
+            var list = List(p); var result = L(p);
+            B(p, "Перевести", () => {
+                int n = N(t); list.Items.Clear();
+                result.Text = "Результат: " + (n < 0 ? "-" : "") +
+                    ConvertBase(Math.Abs((long)n),
+                        int.Parse(basis.SelectedItem.ToString()), list);
+            });
+            Clear(p, () => { result.Text = ""; basis.SelectedIndex = 0; });
+        }
+
+        // 9. Гласные
+        {
+            var p = Page("9. Гласные");
+            var t = T(p, "Строка:");
+            var ru = Check(p, "Учитывать только русские гласные");
+            var list = List(p); var result = L(p);
+            B(p, "Подсчитать", () => {
+                string s = TextInput(t); list.Items.Clear();
+                result.Text = "Гласных: " + Vowels(s, 0, ru.Checked, list);
+            });
+            Clear(p, () => { result.Text = ""; ru.Checked = false; });
+        }
+
+        // 10. Лабиринт
+        {
+            var p = Page("10. Лабиринт");
+            L(p, "0 — проход, 1 — стена. От (0,0) до (4,4), вправо и вниз.");
+            var grid = Add(p, new DataGridView {
+                Width = 400, Height = 200,
+                AllowUserToAddRows = false, AllowUserToDeleteRows = false
+            });
+            for (int j = 0; j < 5; j++) {
+                grid.Columns.Add("c" + j, j.ToString());
+                grid.Columns[j].Width = 65;
+                grid.Columns[j].SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+            grid.RowCount = 5;
+            var result = L(p); var list = List(p);
+            Action<bool> fill = generate => {
+                grid.CancelEdit();
+                for (int i = 0; i < 5; i++)
+                    for (int j = 0; j < 5; j++) {
+                        var cell = grid.Rows[i].Cells[j];
+                        cell.Value = generate ? random.Next(2) : 0;
+                        cell.Style.BackColor = Color.White;
+                    }
+                grid.Rows[0].Cells[0].Value = grid.Rows[4].Cells[4].Value = 0;
+                list.Items.Clear(); result.Text = "";
+            };
+            fill(false);
+            B(p, "Найти путь", () => {
+                if (!grid.EndEdit()) throw new Exception("Завершите ввод.");
+                var a = new int[5, 5]; list.Items.Clear(); result.Text = "";
+                for (int i = 0; i < 5; i++)
+                    for (int j = 0; j < 5; j++) {
+                        var cell = grid.Rows[i].Cells[j];
+                        cell.Style.BackColor = Color.White;
+                        if (!int.TryParse(Convert.ToString(cell.Value), out a[i, j]) ||
+                            (a[i, j] != 0 && a[i, j] != 1))
+                            throw new Exception("Допускаются только 0 и 1.");
+                    }
+                var path = new List<Point>();
+                result.Text = Path(a, 0, 0, path) ? "Путь найден" : "Пути нет";
+                foreach (var point in path) {
+                    list.Items.Add($"({point.Y}, {point.X})");
+                    grid.Rows[point.Y].Cells[point.X].Style.BackColor = Color.LightGreen;
+                }
+            });
+            B(p, "Сгенерировать лабиринт", () => fill(true));
+            Clear(p, () => fill(false));
+        }
+    }
+}
